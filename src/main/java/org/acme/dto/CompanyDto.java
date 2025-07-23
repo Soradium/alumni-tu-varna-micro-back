@@ -7,18 +7,18 @@ public class CompanyDto {
     private Long alumniId;
     private LocalDate enrollmentDate;
     private LocalDate dischargeDate;
-    private String position;
-    private String company;
+    private String positionName;
+    private String companyName;
 
     public CompanyDto() {}
 
-    public CompanyDto(Long id, Long alumniId, LocalDate enrollmentDate, LocalDate dischargeDate, String position, String company) {
+    public CompanyDto(Long id, Long alumniId, LocalDate enrollmentDate, LocalDate dischargeDate, String positionName, String companyName) {
         this.id = id;
         this.alumniId = alumniId;
         this.enrollmentDate = enrollmentDate;
         this.dischargeDate = dischargeDate;
-        this.position = position;
-        this.company = company;
+        this.positionName = positionName;
+        this.companyName = companyName;
     }
 
     public Long getId() {
@@ -53,19 +53,19 @@ public class CompanyDto {
         this.dischargeDate = dischargeDate;
     }
 
-    public String getPosition() {
-        return position;
+    public String getpositionName() {
+        return positionName;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
+    public void setpositionName(String positionName) {
+        this.positionName = positionName;
     }
 
-    public String getCompany() {
-        return company;
+    public String getcompanyName() {
+        return companyName;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
+    public void setcompanyName(String companyName) {
+        this.companyName = companyName;
     }
 }
