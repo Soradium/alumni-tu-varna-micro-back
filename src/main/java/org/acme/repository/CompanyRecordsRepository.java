@@ -8,7 +8,7 @@ import java.util.List;
 
 @ApplicationScoped
 public class CompanyRecordsRepository implements PanacheRepository<CompanyRecords> {
-    public List<CompanyRecords> findByAlumniId(int alumniId){
+    public List<CompanyRecords> findByAlumniId(long alumniId){
         return list("alumni.id", alumniId);
     }
 

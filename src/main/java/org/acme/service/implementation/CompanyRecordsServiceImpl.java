@@ -1,44 +1,47 @@
 package org.acme.service.implementation;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
 import org.acme.api.CompanyGetterApi;
 import org.acme.dto.CompanyDto;
 import org.acme.entites.CompanyRecords;
 import org.acme.exceptions.IncorrectAlumnusNumberException;
+import org.acme.exceptions.ResourceNotFoundException;
 import org.acme.repository.CompanyRecordsRepository;
 import org.acme.service.CompanyRecordsService;
+import org.acme.util.mappers.CompanyMapper;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public class CompanyRecordsServiceImpl implements CompanyRecordsService {
 
     private final CompanyRecordsRepository companyRecordsRepository;
-
     private final CompanyGetterApi companyGetterApi;
+    private final CompanyMapper companyMapper;
 
     public CompanyRecordsServiceImpl(CompanyRecordsRepository companyRecordsRepository,
-                                     CompanyGetterApi companyGetterApi) {
+                                     CompanyGetterApi companyGetterApi, CompanyMapper companyMapper) {
         this.companyRecordsRepository = companyRecordsRepository;
         this.companyGetterApi = companyGetterApi;
+        this.companyMapper = companyMapper;
     }
 
     @Override
-    public List<CompanyDto> getCompanyRecordByAlumniId(int alumniId) throws Exception {
+    public List<CompanyDto> getCompanyRecordByAlumniId(long alumniId) throws Exception {
         // "-": incorrect id, db access failed
         // "+": list of records, empty list
         if(alumniId <= 0)
             throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
         List<CompanyRecords> dbRecords = companyRecordsRepository.findByAlumniId(alumniId);
-        //TODO: Map CompanyRecords to CompanyDto using a mapper
-        return Collections.emptyList();
+        return dbRecords.stream()
+                .map(companyMapper::toDto).toList();
     }
 
     @Override
-    public List<CompanyDto> updateCompanyRecordsByAlumniId(int alumniId) throws Exception {
+    public List<CompanyDto> updateCompanyRecordsByAlumniId(long alumniId) throws Exception {
         // "-": incorrect id, db access failed
         // "+": return if empty lists, else mergeRecords
         if(alumniId <= 0)
@@ -50,9 +53,7 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
         if(dbRecords.isEmpty() || apiRecords.isEmpty())
             return Collections.emptyList();
 
-        mergeCompanyRecords(alumniId, dbRecords, apiRecords);
-
-        return Collections.emptyList();
+        return mergeCompanyRecords(alumniId, dbRecords, apiRecords);
     }
 
     @Override
@@ -60,71 +61,107 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
     public CompanyDto createCompanyRecord(CompanyDto companyDto){
         //"-": db access failed
         //"+": returns saved dto
-        //TODO: Map CompanyDto to CompanyRecords
-        //TODO: Persist to DB
-        //TODO: Return saved DTO
-        //companyRecordsRepository.persist(record);
-        return new CompanyDto();
+        CompanyRecords record = companyMapper.toEntity(companyDto);
+        companyRecordsRepository.persist(record);
+        return companyMapper.toDto(record);
     }
 
     @Override
     @Transactional
-    public CompanyDto updateCompanyRecord(Long id, CompanyDto dto) throws Exception {
-        //"-": db access failed, no record found
-        //"+": returns saved dto
-        CompanyRecords record = companyRecordsRepository.findByIdOptional(id).orElseThrow(
-                () -> new NotFoundException("Record " + id + " not found"));
-        //TODO: Map CompanyDto to CompanyRecords, persist
-        //companyRecordsRepository.persist(record);
-        //TODO: return updated DTO
-        return new CompanyDto();
+    public List<CompanyDto> createCompanyRecord(List<CompanyDto> companyDtoList){
+        //"-": db access failed, empty entry list
+        //"+": returns saved dtoList
+        if (companyDtoList == null || companyDtoList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<CompanyRecords> recordList = companyDtoList.stream()
+                .map(companyMapper::toEntity).toList();
+        companyRecordsRepository.persist(recordList);
+        return recordList.stream().map(companyMapper::toDto).toList();
     }
 
     @Override
-    public void mergeCompanyRecords(int alumniId, List<CompanyRecords> dbRecords, List<CompanyDto> apiRecords) throws Exception {
-        //"-": nothing to insert/update
-        //"+": returns saved dto, calling create() and update()
-        //TODO: compare existing and new records, insert new, update existing
-//        Map<String, CompanyRecords> oldRecordsMap = dbRecords.stream()
-//                .collect(Collectors.toMap(
-//                        r -> r.getAlumni().getId() + "::" +
-//                                r.getEnrollmentDate() + "::" +
-//                                r.getCompany().toLowerCase().trim(),
-//                        Function.identity()
-//                ));
-//
-//        Map<String, CompanyDto> newRecordsMap = apiRecords.stream()
-//                .collect(Collectors.toMap(
-//                        r -> r.getAlumniId() + "::" +
-//                                r.getEnrollmentDate() + "::" +
-//                                r.getcompanyName().toLowerCase().trim(),
-//                        Function.identity()
-//                ));
-
-        Map<String, CompanyRecords> oldRecordsMap = new HashMap<>();
-        Map<String, CompanyDto> newRecordsMap = new HashMap<>();
-
-        Set<String> existingKeys = oldRecordsMap.keySet();
-        Set<String> freshKeys = newRecordsMap.keySet();
-
-        Set<String> keysToInsert = new HashSet<>(freshKeys);
-        keysToInsert.removeAll(existingKeys);
-
-        Set<String> keysToUpdate = new HashSet<>(freshKeys);
-        keysToUpdate.retainAll(existingKeys);
-
-        for (String key : keysToInsert) {
-            CompanyDto dto = newRecordsMap.get(key);
-            createCompanyRecord(dto);
-        }
-
-        for (String key : keysToUpdate) {
-            Long recordId = oldRecordsMap.get(key).getId();
-            CompanyDto dto = newRecordsMap.get(key);
-            updateCompanyRecord(recordId, dto);
-        }
-
+    @Transactional
+    public CompanyDto updateCompanyRecord(long id, CompanyDto dto) {
+        //"-": db access failed, no record found
+        //"+": returns saved dto
+        CompanyRecords record = companyRecordsRepository.findByIdOptional(id).orElseThrow(
+                () -> new ResourceNotFoundException("Record " + id + " not found"));
+        companyMapper.updateEntity(dto, record);
+        companyRecordsRepository.persist(record);
+        return companyMapper.toDto(record);
     }
 
+    @Override
+    @Transactional
+    public List<CompanyDto> updateCompanyRecord(List<Pair<CompanyRecords, CompanyDto>> updates) {
+        if (updates == null || updates.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        List<CompanyRecords> updated = new ArrayList<>();
+        List<CompanyDto> updatedDto = new ArrayList<>();
+
+        for (Pair<CompanyRecords, CompanyDto> pair : updates) {
+            CompanyRecords record = pair.getLeft();
+            CompanyDto dto = pair.getRight();
+            CompanyRecords updatedRecord = companyMapper.updateEntity(dto, record);
+            updated.add(updatedRecord);
+            updatedDto.add(dto);
+        }
+        companyRecordsRepository.persist(updated);
+        return updatedDto;
+    }
+
+    @Override
+    @Transactional
+    public List<CompanyDto> mergeCompanyRecords(long alumniId, List<CompanyRecords> dbRecords, List<CompanyDto> apiRecords) throws Exception {
+        //"-": nothing to insert/update
+        //"+": calls create() and/or update(), returns lists of records or empty.
+        Map<Boolean, List<CompanyDto>> partitionByNullDateAndCompany =
+                apiRecords.stream().collect(Collectors.partitioningBy(
+                        dto -> dto.getEnrollmentDate() != null
+                                && dto.getCompanyName() != null
+                ));
+
+        List<CompanyDto> filteredApiRecords = partitionByNullDateAndCompany.get(true);
+        List<CompanyDto> corruptedRecords = partitionByNullDateAndCompany.get(false);
+        //logging corrupted records? return them?
+
+        Map<String, CompanyRecords> dbRecordsMap = dbRecords.stream()
+                .collect(Collectors.toMap(
+                        this::keyFromRecord,
+                        Function.identity()
+                ));
+
+        List<CompanyDto> toInsert = new ArrayList<>();
+        List<Pair<CompanyRecords, CompanyDto>> toUpdate = new ArrayList<>();
+
+        for (CompanyDto dto : filteredApiRecords) {
+            String key = keyFromDto(dto);
+            if (dbRecordsMap.containsKey(key)) {
+                CompanyRecords dbRecord = dbRecordsMap.get(key);
+                toUpdate.add(Pair.of(dbRecord, dto));
+            } else {
+                toInsert.add(dto);
+            }
+        }
+        List<CompanyDto> inserted = createCompanyRecord(toInsert);
+        List<CompanyDto> updated = updateCompanyRecord(toUpdate);
+
+        List<CompanyDto> merged = new ArrayList<>();
+        merged.addAll(inserted);
+        merged.addAll(updated);
+        return merged;
+    }
+
+    private String keyFromRecord(CompanyRecords record) {
+        //check for null here instead of merge
+        return record.getEnrollmentDate() + "::" + record.getCompany().toLowerCase().trim();
+    }
+
+    private String keyFromDto(CompanyDto dto) {
+        //check for null here instead of merge
+        return dto.getEnrollmentDate() + "::" + dto.getCompanyName().toLowerCase().trim();
+    }
 }

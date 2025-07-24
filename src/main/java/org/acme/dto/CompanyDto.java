@@ -53,19 +53,19 @@ public class CompanyDto {
         this.dischargeDate = dischargeDate;
     }
 
-    public String getpositionName() {
+    public String getPositionName() {
         return positionName;
     }
 
-    public void setpositionName(String positionName) {
+    public void setPositionName(String positionName) {
         this.positionName = positionName;
     }
 
-    public String getcompanyName() {
+    public String getCompanyName() {
         return companyName;
     }
 
-    public void setcompanyName(String companyName) {
+    public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
 }
