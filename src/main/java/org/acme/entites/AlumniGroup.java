@@ -1,6 +1,5 @@
 package org.acme.entites;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 
 @Entity
 @Table(name = "alumni_groups")
-public class AlumniGroups extends PanacheEntityBase {
+public class AlumniGroup extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +17,7 @@ public class AlumniGroups extends PanacheEntityBase {
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")
-    private Faculties faculties;
+    private Faculty faculty;
 
     @NotNull
     @NotBlank
@@ -30,12 +29,12 @@ public class AlumniGroups extends PanacheEntityBase {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "speciality_id")
-    private Specialities specialities;
+    private Speciality speciality;
 
     @OneToMany(mappedBy = "group")
     public ArrayList<AlumniGroupsMembership> memberships;
 
-    public AlumniGroups() {
+    public AlumniGroup() {
     }
 
     public Long getId() {
@@ -46,12 +45,12 @@ public class AlumniGroups extends PanacheEntityBase {
         this.id = id;
     }
 
-    public Faculties getFaculties() {
-        return faculties;
+    public Faculty getFaculties() {
+        return faculty;
     }
 
-    public void setFaculties(Faculties faculties) {
-        this.faculties = faculties;
+    public void setFaculties(Faculty faculty) {
+        this.faculty = faculty;
     }
 
     @NotNull
@@ -74,12 +73,12 @@ public class AlumniGroups extends PanacheEntityBase {
         this.graduationYear = graduationYear;
     }
 
-    public Specialities getSpecialities() {
-        return specialities;
+    public Speciality getSpecialities() {
+        return speciality;
     }
 
-    public void setSpecialities(Specialities specialities) {
-        this.specialities = specialities;
+    public void setSpecialities(Speciality speciality) {
+        this.speciality = speciality;
     }
 
     public ArrayList<AlumniGroupsMembership> getMemberships() {

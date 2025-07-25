@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.apache.kafka.common.protocol.types.Field;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.time.LocalDate;
 
@@ -35,7 +33,7 @@ public class AlumniDetails extends PanacheEntityBase {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "faculty_id")
-    private Faculties faculties;
+    private Faculty faculty;
 
     public AlumniDetails() {
     }
@@ -72,11 +70,11 @@ public class AlumniDetails extends PanacheEntityBase {
         this.birthDate = birthDate;
     }
 
-    public Faculties getFaculties() {
-        return faculties;
+    public Faculty getFaculties() {
+        return faculty;
     }
 
-    public void setFaculties(Faculties faculties) {
-        this.faculties = faculties;
+    public void setFaculties(Faculty faculty) {
+        this.faculty = faculty;
     }
 }

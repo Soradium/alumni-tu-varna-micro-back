@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "company_records")
-public class CompanyRecords extends PanacheEntityBase {
+public class CompanyRecord extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class CompanyRecords extends PanacheEntityBase {
     @Size(max = 255)
     private String company;
 
-    public CompanyRecords() {
+    public CompanyRecord() {
     }
 
     public Long getId() {
