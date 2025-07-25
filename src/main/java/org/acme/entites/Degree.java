@@ -1,27 +1,25 @@
 package org.acme.entites;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
-public class Specialities extends PanacheEntityBase {
+public class Degree extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "degree_id")
     private Long id;
 
     @NotNull
     @NotBlank
     @Size(max = 100)
-    private String speciality;
+    private String degree;
 
-    public Specialities() {
+    public Degree() {
     }
 
     public Long getId() {
@@ -32,11 +30,11 @@ public class Specialities extends PanacheEntityBase {
         this.id = id;
     }
 
-    public @NotNull @NotBlank @Size(max = 100) String getSpeciality() {
-        return speciality;
+    public @NotNull @NotBlank @Size(max = 100) String getDegree() {
+        return degree;
     }
 
-    public void setSpeciality(@NotNull @NotBlank @Size(max = 100) String speciality) {
-        this.speciality = speciality;
+    public void setDegree(@NotNull @NotBlank @Size(max = 100) String degree) {
+        this.degree = degree;
     }
 }
