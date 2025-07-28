@@ -7,14 +7,15 @@ import org.acme.dto.AlumniGroupDto;
 import java.util.List;
 
 public interface AlumniService {
-    AlumniDto getAlumniById(Long alumniId) throws Exception;
+    AlumniDto getAlumniById(long alumniId) throws Exception;
     List<AlumniDto> getAllAlumni() throws Exception;
-    AlumniDto createAlumni(AlumniDto dto) throws Exception;
-    AlumniDto updateAlumni(Long alumniId, AlumniDto dto) throws Exception;
-    AlumniDto deleteAlumni(Long alumniId) throws Exception;
 
-    //createAlumniDetails()? or handle in createAlumni()
-    AlumniDetailsDto getAlumniDetails(Long alumniId) throws Exception;
-    AlumniDetailsDto updateAlumniDetails(Long alumniId, AlumniDetailsDto dto) throws Exception;
+    AlumniDto createAlumni(AlumniDto dto) throws Exception;
+    AlumniDto updateAlumni(long alumniId, AlumniDto dto) throws Exception;
+    AlumniDto deleteAlumni(long alumniId) throws Exception;
+
+    AlumniDetailsDto createAlumniDetails(AlumniDetailsDto dto) throws Exception;
+    AlumniDetailsDto getAlumniDetails(long alumniId) throws Exception;
+    AlumniDetailsDto updateAlumniDetails(long alumniId, AlumniDetailsDto dto) throws Exception;
 
 }

@@ -40,7 +40,12 @@ public class CompanyMapper {
     }
 
     public CompanyRecords updateEntity(CompanyDto dto, CompanyRecords record) {
-        record.setDischargeDate(dto.getDischargeDate());
-        record.setPosition(dto.getPositionName());
+        if(dto.getDischargeDate() != null) {
+            record.setDischargeDate(dto.getDischargeDate());
+        }
+        if(dto.getPositionName() != null) {
+            record.setPosition(dto.getPositionName());
+        }
+        return record;
     }
 }

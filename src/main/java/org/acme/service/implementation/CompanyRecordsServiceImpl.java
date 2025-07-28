@@ -36,6 +36,8 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
         if(alumniId <= 0)
             throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
         List<CompanyRecords> dbRecords = companyRecordsRepository.findByAlumniId(alumniId);
+        if(dbRecords.isEmpty())
+            return Collections.emptyList();
         return dbRecords.stream()
                 .map(companyMapper::toDto).toList();
     }
@@ -116,8 +118,8 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
     @Override
     @Transactional
     public List<CompanyDto> mergeCompanyRecords(long alumniId, List<CompanyRecords> dbRecords, List<CompanyDto> apiRecords) throws Exception {
-        //"-": nothing to insert/update
-        //"+": calls create() and/or update(), returns lists of records or empty.
+        //"-":
+        //"+": calls create() and/or update() returns lists of records,if nothing to insert/update, then empty list.
         Map<Boolean, List<CompanyDto>> partitionByNullDateAndCompany =
                 apiRecords.stream().collect(Collectors.partitioningBy(
                         dto -> dto.getEnrollmentDate() != null
@@ -126,7 +128,7 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
 
         List<CompanyDto> filteredApiRecords = partitionByNullDateAndCompany.get(true);
         List<CompanyDto> corruptedRecords = partitionByNullDateAndCompany.get(false);
-        //logging corrupted records? return them?
+        //logging corrupted records? return them? or Kafka will filter null fields?
 
         Map<String, CompanyRecords> dbRecordsMap = dbRecords.stream()
                 .collect(Collectors.toMap(
@@ -140,8 +142,12 @@ public class CompanyRecordsServiceImpl implements CompanyRecordsService {
         for (CompanyDto dto : filteredApiRecords) {
             String key = keyFromDto(dto);
             if (dbRecordsMap.containsKey(key)) {
+                if(dbRecordsMap.get(key).getDischargeDate() != dto.getDischargeDate()
+                && !(dbRecordsMap.get(key).getPosition().equalsIgnoreCase(dto.getPositionName())))
+                {
                 CompanyRecords dbRecord = dbRecordsMap.get(key);
                 toUpdate.add(Pair.of(dbRecord, dto));
+                }
             } else {
                 toInsert.add(dto);
             }

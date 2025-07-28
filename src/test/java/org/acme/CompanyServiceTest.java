@@ -1,6 +1,5 @@
 package org.acme;
 
-import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import org.acme.api.CompanyGetterApi;
 import org.acme.dto.CompanyDto;
@@ -130,31 +129,39 @@ public class CompanyServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    //nothing to update or insert
     @Test
-    public void test_updateCompanyRecords_byValidId_callsMerge() throws Exception {
-        int validId = 6;
+    public void test_updateCompanyRecords_byValidId_callsMerge_returnsEmptyList() throws Exception {
+        long validId = 6L;
+        CompanyRecords rec = new CompanyRecords();
+        rec.setEnrollmentDate(LocalDate.of(2020, 1, 1));
+        rec.setCompany("A");
+        rec.setPosition("QA");
         List<CompanyRecords> dbList = new ArrayList<>();
-        dbList.add(new CompanyRecords());
+        dbList.add(rec);
 
+        CompanyDto dto = new CompanyDto();
+        dto.setEnrollmentDate(LocalDate.of(2020, 1, 1));
+        dto.setCompanyName("A");
+        dto.setPositionName("QA");
         List<CompanyDto> apiList = new ArrayList<>();
-        apiList.add(new CompanyDto());
+        apiList.add(dto);
 
         when(companyRecordsRepository.findByAlumniId(validId)).thenReturn(dbList);
         when(companyGetterApi.getCompaniesPerAlumni(validId)).thenReturn(apiList);
 
         CompanyRecordsServiceImpl spyService = spy(service);
-        doNothing().when(spyService).mergeCompanyRecords(eq(validId), anyList(), anyList());
+        List<CompanyDto> result = spyService.updateCompanyRecordsByAlumniId(validId);
 
-        spyService.updateCompanyRecordsByAlumniId(validId);
-
-        verify(spyService, times(1)).mergeCompanyRecords(eq(validId), eq(dbList), eq(apiList));
+        verify(spyService, times(1)).mergeCompanyRecords(validId, dbList, apiList);
+        assertEquals(Collections.emptyList(), result);
     }
 
     // Tests for createCompanyRecord(CompanyDto dto)
 
     // Tests for updateCompanyRecord(Long id, CompanyDto dto)
     @Test
-    public void test_updateCompanyRecord_byValidId_returnsDto() throws Exception {
+    public void test_updateCompanyRecord_byValidId_returnsDto(){
         long validId = 6L;
         CompanyRecords record = new CompanyRecords();
 
@@ -177,10 +184,45 @@ public class CompanyServiceTest {
 
     @Test
     public void test_mergeCompanyRecords_callsCreateAndUpdate() throws Exception {
+        long validId = 6L;
+        CompanyRecords rec = new CompanyRecords();
+        rec.setEnrollmentDate(LocalDate.of(2020, 1, 1));
+        rec.setCompany("A");
+        rec.setPosition("QA");
+        List<CompanyRecords> dbList = List.of(rec);
+
+        CompanyDto newDto = new CompanyDto();
+        newDto.setEnrollmentDate(LocalDate.of(2024, 2, 1));
+        newDto.setCompanyName("B");
+        newDto.setPositionName("Developer");
+
+        CompanyDto toUpdateDto = new CompanyDto();
+        toUpdateDto.setEnrollmentDate(LocalDate.of(2020, 1, 1));
+        toUpdateDto.setCompanyName("A");
+        toUpdateDto.setPositionName("QA Lead");
+
+        List<CompanyDto> apiList = List.of(newDto, toUpdateDto);
+
+        when(companyRecordsRepository.findByAlumniId(validId)).thenReturn(dbList);
+        when(companyGetterApi.getCompaniesPerAlumni(validId)).thenReturn(apiList);
+
+        CompanyRecordsServiceImpl spyService = spy(service);
+        doReturn(List.of(newDto)).when(spyService).createCompanyRecord(anyList());
+        doReturn(List.of(toUpdateDto)).when(spyService).updateCompanyRecord(anyList());
+
+        List<CompanyDto> result = spyService.updateCompanyRecordsByAlumniId(validId);
+
+        List<CompanyDto> expected = new ArrayList<>();
+        expected.add(newDto);
+        expected.add(toUpdateDto);
+
+        verify(spyService, times(1)).mergeCompanyRecords(validId, dbList, apiList);
+        verify(spyService, times(1)).createCompanyRecord(anyList());
+        verify(spyService, times(1)).updateCompanyRecord(anyList());
+
+        assertEquals(expected, result);
     }
 
-    @Test
-    public void test_mergeCompanyRecords_withNoDifferences_doesNothing() throws Exception {}
     //TODO: tests for database access failure(?)
 
 }

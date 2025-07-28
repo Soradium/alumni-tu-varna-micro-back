@@ -1,15 +1,18 @@
 package org.acme.dto;
 
+import org.acme.entites.ApiBase;
+
 public class AlumniDto {
     private Long id;
-    private Long apiBaseId;      // reference to ApiBase
+    private ApiBaseDto apiBase;
     private Long degreeId;
+    //ad list of memberships
 
     public AlumniDto() {}
 
-    public AlumniDto(Long id, Long apiBaseId, Long degreeId) {
+    public AlumniDto(Long id, ApiBaseDto apiBase, Long degreeId) {
         this.id = id;
-        this.apiBaseId = apiBaseId;
+        this.apiBase = apiBase;
         this.degreeId = degreeId;
     }
 
@@ -21,12 +24,12 @@ public class AlumniDto {
         this.id = id;
     }
 
-    public Long getApiBaseId() {
-        return apiBaseId;
+    public ApiBaseDto getApiBase() {
+        return apiBase;
     }
 
-    public void setApiBaseId(Long apiBaseId) {
-        this.apiBaseId = apiBaseId;
+    public void setApiBase(ApiBaseDto apiBase) {
+        this.apiBase = apiBase;
     }
 
     public Long getDegreeId() {

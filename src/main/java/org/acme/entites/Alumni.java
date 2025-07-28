@@ -14,7 +14,7 @@ public class Alumni extends PanacheEntityBase {
 
     @ManyToOne
     @JoinColumn(name = "api_base_id")
-    private ApiBase apiBaseId;
+    private ApiBase apiBase;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "degree_id")
@@ -34,12 +34,12 @@ public class Alumni extends PanacheEntityBase {
         this.id = id;
     }
 
-    public ApiBase getApiBaseId() {
-        return apiBaseId;
+    public ApiBase getApiBase() {
+        return apiBase;
     }
 
-    public void setApiBaseId(ApiBase apiBaseId) {
-        this.apiBaseId = apiBaseId;
+    public void setApiBase(ApiBase apiBase) {
+        this.apiBase = apiBase;
     }
 
     public Degrees getDegrees() {
