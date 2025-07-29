@@ -7,26 +7,28 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
+@Table(name = "degrees")
 public class Degree extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "degree_id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @NotBlank
     @Size(max = 100)
+    @Column(name = "degree_name")
     private String degree;
 
     public Degree() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -37,4 +39,6 @@ public class Degree extends PanacheEntityBase {
     public void setDegree(@NotNull @NotBlank @Size(max = 100) String degree) {
         this.degree = degree;
     }
+
+    
 }

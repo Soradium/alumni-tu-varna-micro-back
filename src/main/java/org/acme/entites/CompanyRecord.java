@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -14,36 +15,44 @@ public class CompanyRecord extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "company_record_id")
+    private Integer id;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.REFRESH})
-    @JoinColumn(name = "alumni_id")
+    @JoinColumn(name = "faculty_number")
     private Alumni alumni;
 
     @NotBlank
     @NotNull
+    @Column(name = "enrollment_date")
     private LocalDate enrollmentDate;
 
+    @Column(name = "discharge_date")
     private LocalDate dischargeDate;
 
     @NotNull
     @NotBlank
     @Size(max = 255)
+    @Column(name = "position_name")
     private String position;
 
     @NotNull
     @NotBlank
     @Size(max = 255)
+    @Column(name = "company_name")
     private String company;
+
+    @Column(name = "created_at")
+    private Timestamp createdAt;
 
     public CompanyRecord() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

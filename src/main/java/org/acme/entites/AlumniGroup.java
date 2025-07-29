@@ -13,7 +13,8 @@ public class AlumniGroup extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "groups_id")
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")
@@ -21,27 +22,29 @@ public class AlumniGroup extends PanacheEntityBase {
 
     @NotNull
     @NotBlank
+    @Column(name = "group_number")
     private int groupNumber;
 
     @NotNull
     @NotBlank
+    @Column(name = "graduation_year")
     private int graduationYear;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "speciality_id")
     private Speciality speciality;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group_number")
     public ArrayList<AlumniGroupsMembership> memberships;
 
     public AlumniGroup() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -88,4 +91,22 @@ public class AlumniGroup extends PanacheEntityBase {
     public void setMemberships(ArrayList<AlumniGroupsMembership> memberships) {
         this.memberships = memberships;
     }
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
+    }
+
+    public Speciality getSpeciality() {
+        return speciality;
+    }
+
+    public void setSpeciality(Speciality speciality) {
+        this.speciality = speciality;
+    }
+
+    
 }

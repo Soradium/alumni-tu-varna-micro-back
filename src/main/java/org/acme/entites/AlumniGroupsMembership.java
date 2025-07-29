@@ -9,27 +9,22 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    @Column(name = "group_member_id")
+    public Integer id;
 
     @ManyToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
-    @JoinColumn(name = "alumni_id")
+    @JoinColumn(name = "faculty_number")
     public Alumni alumni;
 
     @ManyToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "groups_id")
     public AlumniGroup group;
 
+    @Column(name = "average_score")
     public double averageScore;
 
     public AlumniGroupsMembership() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    
     }
 
     public Alumni getAlumni() {
@@ -55,4 +50,14 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
     public void setAverageScore(double averageScore) {
         this.averageScore = averageScore;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    
 }
