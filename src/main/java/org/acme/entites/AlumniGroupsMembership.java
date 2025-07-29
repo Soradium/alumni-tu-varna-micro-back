@@ -17,7 +17,7 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
 
     @ManyToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "group_id")
-    public AlumniGroups group;
+    public AlumniGroup group;
 
     public double averageScore;
 
@@ -40,11 +40,11 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
         this.alumni = alumni;
     }
 
-    public AlumniGroups getGroup() {
+    public AlumniGroup getGroup() {
         return group;
     }
 
-    public void setGroup(AlumniGroups group) {
+    public void setGroup(AlumniGroup group) {
         this.group = group;
     }
 

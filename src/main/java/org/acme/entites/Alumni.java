@@ -18,7 +18,7 @@ public class Alumni extends PanacheEntityBase {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "degree_id")
-    private Degrees degrees;
+    private Degree degree;
 
     @OneToMany(mappedBy = "alumni")
     public ArrayList<AlumniGroupsMembership> memberships;
@@ -42,12 +42,12 @@ public class Alumni extends PanacheEntityBase {
         this.apiBaseId = apiBaseId;
     }
 
-    public Degrees getDegrees() {
-        return degrees;
+    public Degree getDegrees() {
+        return degree;
     }
 
-    public void setDegrees(Degrees degrees) {
-        this.degrees = degrees;
+    public void setDegrees(Degree degree) {
+        this.degree = degree;
     }
 
     public ArrayList<AlumniGroupsMembership> getMemberships() {
