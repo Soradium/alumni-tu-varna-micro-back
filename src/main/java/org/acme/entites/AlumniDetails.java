@@ -5,9 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.apache.kafka.common.protocol.types.Field;
-import org.hibernate.validator.constraints.UniqueElements;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Entity
@@ -15,9 +14,8 @@ import java.time.LocalDate;
 public class AlumniDetails extends PanacheEntityBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "alumni_id")
-    private Long id;
+    @Column(name = "faculty_number")
+    private Integer facultyNumber;
 
     @Column(name = "full_name")
     @NotNull
@@ -25,27 +23,21 @@ public class AlumniDetails extends PanacheEntityBase {
     @Size(max = 255)
     private String fullName;
 
-    @Column(name = "faculty_number")
-    @NotNull
-    @Size(max = 100)
-    private String facultyNumber;
-
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "faculty_id")
-    private Faculties faculties;
+    private Faculty faculty;
+
+    @Column(name = "created_at")
+    private Timestamp createdAt;
+
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
 
     public AlumniDetails() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        
     }
 
     public @NotNull @NotBlank @Size(max = 255) String getFullName() {
@@ -56,11 +48,11 @@ public class AlumniDetails extends PanacheEntityBase {
         this.fullName = fullName;
     }
 
-    public @NotNull @Size(max = 100) String getFacultyNumber() {
+    public @NotNull @Size(max = 100) Integer getFacultyNumber() {
         return facultyNumber;
     }
 
-    public void setFacultyNumber(@NotNull @Size(max = 100) String facultyNumber) {
+    public void setFacultyNumber(@NotNull @Size(max = 100) Integer facultyNumber) {
         this.facultyNumber = facultyNumber;
     }
 
@@ -72,11 +64,37 @@ public class AlumniDetails extends PanacheEntityBase {
         this.birthDate = birthDate;
     }
 
-    public Faculties getFaculties() {
-        return faculties;
+    public Faculty getFaculties() {
+        return faculty;
     }
 
-    public void setFaculties(Faculties faculties) {
-        this.faculties = faculties;
+    public void setFaculties(Faculty faculty) {
+        this.faculty = faculty;
     }
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    
 }

@@ -35,7 +35,7 @@ public class CompanyGetterTest {
             LocalDate.now(),
             "pos",
             "cp"
-        ); // Replace with actual constructor
+        ); 
         List<CompanyDto> companies = new ArrayList<>();
         companies.add(company);
         when(api.getCompaniesPerAlumni(alumnId)).thenReturn(companies);

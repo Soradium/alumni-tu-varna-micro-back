@@ -1,6 +1,5 @@
 package org.acme.api;
 import org.acme.exceptions.IncorrectAlumnusNumberException;
-import org.acme.exceptions.NegativeAlumnusNumberException;
 
 import java.util.List;
 

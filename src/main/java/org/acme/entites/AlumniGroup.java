@@ -1,6 +1,5 @@
 package org.acme.entites;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -10,48 +9,51 @@ import java.util.ArrayList;
 
 @Entity
 @Table(name = "alumni_groups")
-public class AlumniGroups extends PanacheEntityBase {
+public class AlumniGroup extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "groups_id")
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")
-    private Faculties faculties;
+    private Faculty faculty;
 
     @NotNull
     @NotBlank
+    @Column(name = "group_number")
     private int groupNumber;
 
     @NotNull
     @NotBlank
+    @Column(name = "graduation_year")
     private int graduationYear;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "speciality_id")
-    private Specialities specialities;
+    private Speciality speciality;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group_number")
     public ArrayList<AlumniGroupsMembership> memberships;
 
-    public AlumniGroups() {
+    public AlumniGroup() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Faculties getFaculties() {
-        return faculties;
+    public Faculty getFaculties() {
+        return faculty;
     }
 
-    public void setFaculties(Faculties faculties) {
-        this.faculties = faculties;
+    public void setFaculties(Faculty faculty) {
+        this.faculty = faculty;
     }
 
     @NotNull
@@ -74,12 +76,12 @@ public class AlumniGroups extends PanacheEntityBase {
         this.graduationYear = graduationYear;
     }
 
-    public Specialities getSpecialities() {
-        return specialities;
+    public Speciality getSpecialities() {
+        return speciality;
     }
 
-    public void setSpecialities(Specialities specialities) {
-        this.specialities = specialities;
+    public void setSpecialities(Speciality speciality) {
+        this.speciality = speciality;
     }
 
     public ArrayList<AlumniGroupsMembership> getMemberships() {
@@ -89,4 +91,22 @@ public class AlumniGroups extends PanacheEntityBase {
     public void setMemberships(ArrayList<AlumniGroupsMembership> memberships) {
         this.memberships = memberships;
     }
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
+    }
+
+    public Speciality getSpeciality() {
+        return speciality;
+    }
+
+    public void setSpeciality(Speciality speciality) {
+        this.speciality = speciality;
+    }
+
+    
 }

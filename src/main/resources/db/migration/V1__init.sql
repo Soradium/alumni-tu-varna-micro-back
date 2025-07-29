@@ -5,8 +5,8 @@ CREATE TABLE api_base (
                           linkedin_url VARCHAR(255)
 );
 
--- Faculties
-CREATE TABLE faculties (
+-- Faculty
+CREATE TABLE faculty (
                            faculty_id INT PRIMARY KEY,
                            faculty_name VARCHAR(50) NOT NULL
 );
@@ -24,7 +24,7 @@ CREATE TABLE alumni_details (
                                 full_name VARCHAR(255) NOT NULL,
                                 faculty_number VARCHAR(100) NOT NULL UNIQUE,
                                 birth_date DATE,
-                                faculty_id INT REFERENCES faculties(faculty_id)
+                                faculty_id INT REFERENCES faculty(faculty_id)
 );
 
 -- Company records (each belongs to one alumni, 1:N)
@@ -57,7 +57,7 @@ CREATE TABLE user_roles (
 -- Groups for alumni (e.g. by faculty or graduation year)
 CREATE TABLE alumni_groups (
                                id SERIAL PRIMARY KEY,
-                               faculty_id INT REFERENCES faculties(faculty_id),
+                               faculty_id INT REFERENCES faculty(faculty_id),
                                group_number INT NOT NULL,
                                graduation_year INT NOT NULL,
                                speciality VARCHAR(100) NOT NULL
