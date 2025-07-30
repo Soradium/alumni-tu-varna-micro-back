@@ -34,7 +34,7 @@ public class AlumniGroup extends PanacheEntityBase {
     @JoinColumn(name = "speciality_id")
     private Speciality speciality;
 
-    @OneToMany(mappedBy = "group_number")
+    @OneToMany(mappedBy = "group")
     public ArrayList<AlumniGroupsMembership> memberships;
 
     public AlumniGroup() {
