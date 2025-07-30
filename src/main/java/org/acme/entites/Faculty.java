@@ -12,7 +12,7 @@ public class Faculty extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "faculty_id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @NotBlank
@@ -23,11 +23,11 @@ public class Faculty extends PanacheEntityBase {
     public Faculty() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -38,4 +38,6 @@ public class Faculty extends PanacheEntityBase {
     public void setFacultyName(@NotNull @NotBlank @Size(max = 100) String facultyName) {
         this.facultyName = facultyName;
     }
+
+    
 }
