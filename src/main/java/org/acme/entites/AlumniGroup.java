@@ -20,8 +20,6 @@ public class AlumniGroup extends PanacheEntityBase {
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
-    @NotNull
-    @NotBlank
     @Column(name = "group_number")
     private int groupNumber;
 
@@ -34,7 +32,7 @@ public class AlumniGroup extends PanacheEntityBase {
     @JoinColumn(name = "speciality_id")
     private Speciality speciality;
 
-    @OneToMany(mappedBy = "group_number")
+    @OneToMany(mappedBy = "group")
     public ArrayList<AlumniGroupsMembership> memberships;
 
     public AlumniGroup() {

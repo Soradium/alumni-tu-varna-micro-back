@@ -13,7 +13,7 @@ public class CompanyGetterApi {
         this.strategy = strategy;
     }
     
-    public List<CompanyDto> getCompaniesPerAlumni(long alumniId) throws Exception {
+    public List<CompanyDto> getCompaniesPerAlumni(int alumniId) throws Exception {
         // possible bad outcomes: no strategy set, null list
         // positive: list that has companies, empty list
         if(this.strategy == null) {

@@ -1,42 +1,55 @@
 package org.acme.dto;
 
-import org.acme.entites.ApiBase;
+import org.acme.entites.AlumniGroupsMembership;
+
+import java.util.ArrayList;
 
 public class AlumniDto {
-    private Long id;
-    private ApiBaseDto apiBase;
-    private Long degreeId;
-    //ad list of memberships
+    private Integer facultyNumber;
+    private String facebookUrl;
+    private String linkedInUrl;
+    private DegreeDto degree;
+    private ArrayList<AlumniGroupsMembershipDto> memberships;
 
     public AlumniDto() {}
 
-    public AlumniDto(Long id, ApiBaseDto apiBase, Long degreeId) {
-        this.id = id;
-        this.apiBase = apiBase;
-        this.degreeId = degreeId;
+    public Integer getFacultyNumber() {
+        return facultyNumber;
     }
 
-    public Long getId() {
-        return id;
+    public void setFacultyNumber(Integer facultyNumber) {
+        this.facultyNumber = facultyNumber;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getFacebookUrl() {
+        return facebookUrl;
     }
 
-    public ApiBaseDto getApiBase() {
-        return apiBase;
+    public void setFacebookUrl(String facebookUrl) {
+        this.facebookUrl = facebookUrl;
     }
 
-    public void setApiBase(ApiBaseDto apiBase) {
-        this.apiBase = apiBase;
+    public String getLinkedInUrl() {
+        return linkedInUrl;
     }
 
-    public Long getDegreeId() {
-        return degreeId;
+    public void setLinkedInUrl(String linkedInUrl) {
+        this.linkedInUrl = linkedInUrl;
     }
 
-    public void setDegreeId(Long degreeId) {
-        this.degreeId = degreeId;
+    public DegreeDto getDegreeDto() {
+        return degree;
+    }
+
+    public void setDegreeDto(DegreeDto degree) {
+        this.degree = degree;
+    }
+
+    public ArrayList<AlumniGroupsMembershipDto> getMemberships() {
+        return memberships;
+    }
+
+    public void setMemberships(ArrayList<AlumniGroupsMembershipDto> memberships) {
+        this.memberships = memberships;
     }
 }

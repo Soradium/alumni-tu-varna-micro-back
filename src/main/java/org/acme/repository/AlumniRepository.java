@@ -8,7 +8,4 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class AlumniRepository implements PanacheRepository<Alumni> {
-    public Optional<Alumni> findByApiBaseId(Long apiBaseId) {
-        return find("apiBase.id", apiBaseId).firstResultOptional();
-    }
 }

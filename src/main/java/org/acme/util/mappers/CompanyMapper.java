@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import org.acme.dto.CompanyDto;
 import org.acme.entites.Alumni;
-import org.acme.entites.CompanyRecords;
+import org.acme.entites.CompanyRecord;
 import org.acme.exceptions.ResourceNotFoundException;
 import org.acme.repository.AlumniRepository;
 
@@ -14,10 +14,10 @@ public class CompanyMapper {
     @Inject
     AlumniRepository alumniRepository;
 
-    public CompanyDto toDto(CompanyRecords record) {
+    public CompanyDto toDto(CompanyRecord record) {
         CompanyDto dto = new CompanyDto();
         dto.setId(record.getId());
-        dto.setAlumniId(record.getAlumni().getId());
+        dto.setAlumniId(record.getAlumni().getFacultyNumber());
         dto.setEnrollmentDate(record.getEnrollmentDate());
         dto.setDischargeDate(record.getDischargeDate());
         dto.setPositionName(record.getPosition());
@@ -25,21 +25,17 @@ public class CompanyMapper {
         return dto;
     }
 
-    public CompanyRecords toEntity(CompanyDto dto) {
-        CompanyRecords record = new CompanyRecords();
+    public CompanyRecord toEntity(CompanyDto dto, Alumni alumni) {
+        CompanyRecord record = new CompanyRecord();
         record.setEnrollmentDate(dto.getEnrollmentDate());
         record.setDischargeDate(dto.getDischargeDate());
         record.setPosition(dto.getPositionName());
         record.setCompany(dto.getCompanyName());
-
-        Alumni alumni = alumniRepository.findByIdOptional(dto.getAlumniId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Alumni not found"));
         record.setAlumni(alumni);
-
         return record;
     }
 
-    public CompanyRecords updateEntity(CompanyDto dto, CompanyRecords record) {
+    public CompanyRecord updateEntity(CompanyDto dto, CompanyRecord record) {
         if(dto.getDischargeDate() != null) {
             record.setDischargeDate(dto.getDischargeDate());
         }

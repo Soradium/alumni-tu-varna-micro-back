@@ -2,64 +2,86 @@ package org.acme.util.mappers;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.acme.dto.AlumniDetailsDto;
 import org.acme.dto.AlumniDto;
-import org.acme.dto.ApiBaseDto;
-import org.acme.dto.DegreeDto;
-import org.acme.entites.Alumni;
-import org.acme.entites.ApiBase;
-import org.acme.exceptions.ResourceNotFoundException;
-import org.acme.repository.AlumniRepository;
-import org.acme.repository.ApiBaseRepository;
-import org.acme.service.ApiBaseService;
-import org.acme.service.DegreesService;
+import org.acme.entites.*;
+import org.acme.repository.DegreeRepository;
+import org.acme.repository.FacultyRepository;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AlumniMapper {
     @Inject
-    ApiBaseService apiBaseService;
+    DegreeMapper degreeMapper;
     @Inject
-    DegreesService degreesService;
-    @Inject
-    ApiBaseMapper apiBaseMapper;
-    @Inject
-    DegreesMapper degreesMapper;
-
+    AlumniGroupsMembershipMapper membershipMapper;
 
 
     public AlumniDto toDto(Alumni alumni){
         AlumniDto alumniDto = new AlumniDto();
-        alumniDto.setId(alumni.getId());
-        alumniDto.setApiBase(apiBaseMapper.toDto(alumni.getApiBase()));
-        alumniDto.setDegreeId(alumni.getDegrees().getId());
+        alumniDto.setFacultyNumber(alumni.getFacultyNumber());
+        alumniDto.setFacebookUrl(alumni.getFacebookUrl());
+        alumniDto.setLinkedInUrl(alumni.getLinkedInUrl());
+        alumniDto.setDegreeDto(degreeMapper.toDto(alumni.getDegree()));
+
+        alumniDto.setMemberships(
+                alumni.getMemberships().stream().map(membershipMapper::toDto)
+                        .collect(Collectors.toCollection(ArrayList::new))
+        );
         return alumniDto;
     }
-    public Alumni toEntity(AlumniDto alumniDto){
+    public Alumni toEntity(AlumniDto alumniDto, Degree degree){
         Alumni alumni = new Alumni();
-        ApiBaseDto apiBaseDto;
-
-        if(apiBaseService.isApiBaseExist(alumniDto.getApiBase())){
-            apiBaseDto = apiBaseService.getApiBase(
-                    alumniDto.getApiBase()
-            );
+        if(alumniDto.getFacebookUrl() != null){
+            alumni.setFacebookUrl(alumniDto.getFacebookUrl());
         }
-        else apiBaseDto = apiBaseService.createApiBase(alumniDto.getApiBase());
-        alumni.setApiBase(apiBaseMapper.toEntity(apiBaseDto));
-
-        DegreeDto degreeDto = degreesService.getDegreeById(alumniDto.getDegreeId());
-        alumni.setDegrees(degreesMapper.toEntity(degreeDto));
-
+        if(alumniDto.getLinkedInUrl() != null){
+            alumni.setLinkedInUrl(alumniDto.getLinkedInUrl());
+        }
+        alumni.setDegree(degree);
         return alumni;
     }
 
-    public Alumni updateEntity(AlumniDto alumniDto, Alumni alumni){
-        if(alumniDto.getApiBase() != null){
-            alumni.getApiBase().setFacebookUrl(alumniDto.getApiBase().getFacebookUrl());
-            alumni.getApiBase().setLinkedinUrl(alumniDto.getApiBase().getLinkedinUrl());
+    public void updateEntity(AlumniDto alumniDto, Alumni alumni, Degree degree){
+        if(alumniDto.getFacebookUrl() != null){
+            alumni.setFacebookUrl(alumniDto.getFacebookUrl());
         }
-        if(alumniDto.getDegreeId() != null){
-            DegreeDto degreeDto = degreesService.getDegreeById(alumniDto.getDegreeId());
-            alumni.setDegrees(degreesMapper.toEntity(degreeDto));
+        if(alumniDto.getLinkedInUrl() != null){
+            alumni.setLinkedInUrl(alumniDto.getLinkedInUrl());
         }
-        return alumni;
+        if(alumniDto.getDegreeDto() != null){
+            alumni.setDegree(degree);
+        }
+    }
+
+    public AlumniDetailsDto toDetailsDto(AlumniDetails alumniDetails){
+        AlumniDetailsDto dto = new AlumniDetailsDto();
+        dto.setFacultyNumber(alumniDetails.getFacultyNumber());
+        dto.setFullName(alumniDetails.getFullName());
+        dto.setBirthDate(alumniDetails.getBirthDate());
+        dto.setFaculty(alumniDetails.getFaculty().getId());
+        return dto;
+    }
+
+    public AlumniDetails toDetailsEntity(AlumniDetailsDto dto, Faculty faculty){
+        AlumniDetails entity = new AlumniDetails();
+        entity.setFullName(dto.getFullName());
+        entity.setBirthDate(dto.getBirthDate());
+        entity.setFaculty(faculty);
+        return entity;
+    }
+
+    public void updateDetails(AlumniDetailsDto dto, AlumniDetails entity, Faculty faculty){
+        if(dto.getFullName() != null){
+            entity.setFullName(dto.getFullName());
+        }
+        if(dto.getBirthDate() != null){
+            entity.setBirthDate(dto.getBirthDate());
+        }
+        if(dto.getFaculty() != null) {
+            entity.setFaculty(faculty);
+        }
     }
 }

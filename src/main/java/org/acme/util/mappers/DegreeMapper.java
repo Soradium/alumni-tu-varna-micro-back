@@ -1,18 +1,20 @@
 package org.acme.util.mappers;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.dto.DegreeDto;
-import org.acme.entites.Degrees;
+import org.acme.entites.Degree;
 
-public class DegreesMapper {
-    public DegreeDto toDto(Degrees degree) {
+@ApplicationScoped
+public class DegreeMapper {
+    public DegreeDto toDto(Degree degree) {
         DegreeDto degreeDto = new DegreeDto();
         degreeDto.setId(degree.getId());
         degreeDto.setDegree(degree.getDegree());
         return degreeDto;
     }
 
-    public Degrees toEntity(DegreeDto degreeDto) {
-        Degrees degree = new Degrees();
+    public Degree toEntity(DegreeDto degreeDto) {
+        Degree degree = new Degree();
         degree.setDegree(degreeDto.getDegree());
         return degree;
     }

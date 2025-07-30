@@ -1,13 +1,15 @@
-package org.acme;
+package org.acme.services;
 
 import jakarta.ws.rs.NotFoundException;
 import org.acme.api.CompanyGetterApi;
 import org.acme.dto.CompanyDto;
 import org.acme.entites.Alumni;
-import org.acme.entites.CompanyRecords;
+import org.acme.entites.CompanyRecord;
 import org.acme.exceptions.IncorrectAlumnusNumberException;
+import org.acme.exceptions.ResourceNotFoundException;
+import org.acme.repository.AlumniRepository;
 import org.acme.repository.CompanyRecordsRepository;
-import org.acme.service.implementation.CompanyRecordsServiceImpl;
+import org.acme.service.implementation.CompanyRecordServiceImpl;
 import org.acme.util.mappers.CompanyMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,38 +26,41 @@ import static org.mockito.Mockito.*;
 
 
 public class CompanyServiceTest {
-    private CompanyRecordsServiceImpl service;
+    private CompanyRecordServiceImpl service;
     private CompanyRecordsRepository companyRecordsRepository;
+    private AlumniRepository alumniRepository;
     private CompanyGetterApi companyGetterApi;
 
     @BeforeEach
     public void setUp() {
         companyRecordsRepository = Mockito.mock(CompanyRecordsRepository.class);
         companyGetterApi = Mockito.mock(CompanyGetterApi.class);
+        alumniRepository = Mockito.mock(AlumniRepository.class);
         CompanyMapper companyMapper = new CompanyMapper();
-        service = new CompanyRecordsServiceImpl(companyRecordsRepository, companyGetterApi, companyMapper);
+        service = new CompanyRecordServiceImpl(companyRecordsRepository,
+                alumniRepository, companyGetterApi,companyMapper);
     }
 
     //Tests for getCompanyRecordByAlumniId(int alumniId) method
     @Test
     public void test_getCompanyRecords_byValidId_returnsDtos() throws Exception {
-        long validId = 6L;
+        int validId = 6;
         Alumni mockAlumni1 = new Alumni();
-        mockAlumni1.setId(validId);
+        mockAlumni1.setFacultyNumber(validId);
 
         LocalDate enrollmentDate1 = LocalDate.of(2020, 1, 1);
         LocalDate enrollmentDate2 = LocalDate.of(2023, 1, 2);
         LocalDate dischargeDate1 = LocalDate.of(2022, 6, 3);
-        CompanyRecords record1 = new CompanyRecords();
-        record1.setId(3L);
+        CompanyRecord record1 = new CompanyRecord();
+        record1.setId(3);
         record1.setAlumni(mockAlumni1);
         record1.setEnrollmentDate(enrollmentDate1);
         record1.setDischargeDate(dischargeDate1);
         record1.setPosition("QA");
         record1.setCompany("A");
 
-        CompanyRecords record2 = new CompanyRecords();
-        record2.setId(4L);
+        CompanyRecord record2 = new CompanyRecord();
+        record2.setId(4);
         record2.setAlumni(mockAlumni1);
         record2.setEnrollmentDate(enrollmentDate2);
         record2.setPosition("Intern");
@@ -133,11 +138,11 @@ public class CompanyServiceTest {
     @Test
     public void test_updateCompanyRecords_byValidId_callsMerge_returnsEmptyList() throws Exception {
         long validId = 6L;
-        CompanyRecords rec = new CompanyRecords();
+        CompanyRecord rec = new CompanyRecord();
         rec.setEnrollmentDate(LocalDate.of(2020, 1, 1));
         rec.setCompany("A");
         rec.setPosition("QA");
-        List<CompanyRecords> dbList = new ArrayList<>();
+        List<CompanyRecord> dbList = new ArrayList<>();
         dbList.add(rec);
 
         CompanyDto dto = new CompanyDto();
@@ -148,9 +153,9 @@ public class CompanyServiceTest {
         apiList.add(dto);
 
         when(companyRecordsRepository.findByAlumniId(validId)).thenReturn(dbList);
-        when(companyGetterApi.getCompaniesPerAlumni(validId)).thenReturn(apiList);
+        when(companyGetterApi.getCompaniesPerAlumni((int)validId)).thenReturn(apiList);
 
-        CompanyRecordsServiceImpl spyService = spy(service);
+        CompanyRecordServiceImpl spyService = spy(service);
         List<CompanyDto> result = spyService.updateCompanyRecordsByAlumniId(validId);
 
         verify(spyService, times(1)).mergeCompanyRecords(validId, dbList, apiList);
@@ -163,7 +168,10 @@ public class CompanyServiceTest {
     @Test
     public void test_updateCompanyRecord_byValidId_returnsDto(){
         long validId = 6L;
-        CompanyRecords record = new CompanyRecords();
+        CompanyRecord record = new CompanyRecord();
+        Alumni alumni = new Alumni();
+        alumni.setFacultyNumber(22221111);
+        record.setAlumni(alumni);
 
         when(companyRecordsRepository.findByIdOptional(validId))
                 .thenReturn(Optional.of(record));
@@ -178,18 +186,18 @@ public class CompanyServiceTest {
         long validId = 6L;
         when(companyRecordsRepository.findByIdOptional(validId)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> service.updateCompanyRecord(validId, new CompanyDto()));
     }
 
     @Test
     public void test_mergeCompanyRecords_callsCreateAndUpdate() throws Exception {
         long validId = 6L;
-        CompanyRecords rec = new CompanyRecords();
+        CompanyRecord rec = new CompanyRecord();
         rec.setEnrollmentDate(LocalDate.of(2020, 1, 1));
         rec.setCompany("A");
         rec.setPosition("QA");
-        List<CompanyRecords> dbList = List.of(rec);
+        List<CompanyRecord> dbList = List.of(rec);
 
         CompanyDto newDto = new CompanyDto();
         newDto.setEnrollmentDate(LocalDate.of(2024, 2, 1));
@@ -204,10 +212,10 @@ public class CompanyServiceTest {
         List<CompanyDto> apiList = List.of(newDto, toUpdateDto);
 
         when(companyRecordsRepository.findByAlumniId(validId)).thenReturn(dbList);
-        when(companyGetterApi.getCompaniesPerAlumni(validId)).thenReturn(apiList);
+        when(companyGetterApi.getCompaniesPerAlumni((int)validId)).thenReturn(apiList);
 
-        CompanyRecordsServiceImpl spyService = spy(service);
-        doReturn(List.of(newDto)).when(spyService).createCompanyRecord(anyList());
+        CompanyRecordServiceImpl spyService = spy(service);
+        doReturn(List.of(newDto)).when(spyService).createCompanyRecord(validId, anyList());
         doReturn(List.of(toUpdateDto)).when(spyService).updateCompanyRecord(anyList());
 
         List<CompanyDto> result = spyService.updateCompanyRecordsByAlumniId(validId);
@@ -217,12 +225,12 @@ public class CompanyServiceTest {
         expected.add(toUpdateDto);
 
         verify(spyService, times(1)).mergeCompanyRecords(validId, dbList, apiList);
-        verify(spyService, times(1)).createCompanyRecord(anyList());
+        verify(spyService, times(1)).createCompanyRecord(validId, anyList());
         verify(spyService, times(1)).updateCompanyRecord(anyList());
 
         assertEquals(expected, result);
     }
 
-    //TODO: tests for database access failure(?)
+    //TODO: tests for database access
 
 }

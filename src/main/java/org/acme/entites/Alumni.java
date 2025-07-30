@@ -23,7 +23,7 @@ public class Alumni extends PanacheEntityBase {
     @JoinColumn(name = "degree_id")
     private Degree degree;
 
-    @OneToMany(mappedBy = "faculty_number")
+    @OneToMany(mappedBy = "alumni")
     public ArrayList<AlumniGroupsMembership> memberships;
 
     public Alumni() {

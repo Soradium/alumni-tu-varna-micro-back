@@ -1,16 +1,16 @@
 package org.acme.dto;
 
 public class DegreeDto {
-    private Long id;
+    private Integer id;
     private String degree;
 
     public DegreeDto() {}
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

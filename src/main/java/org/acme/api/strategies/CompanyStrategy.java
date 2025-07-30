@@ -4,5 +4,5 @@ import java.util.List;
 import org.acme.dto.CompanyDto;
 
 public interface CompanyStrategy {
-    public List<CompanyDto> getCompanies(long alumniId);
+    public List<CompanyDto> getCompanies(int alumniId);
 }

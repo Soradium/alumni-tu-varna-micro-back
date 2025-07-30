@@ -1,30 +1,22 @@
 package org.acme.dto;
 
+import org.acme.entites.Faculty;
 import java.time.LocalDate;
 
 public class AlumniDetailsDto {
-    private Long alumniId;       // matches AlumniDetails.id
+    private Integer facultyNumber;
     private String fullName;
-    private String facultyNumber;
     private LocalDate birthDate;
-    private Long facultyId;
+    private Integer facultyId;
 
     public AlumniDetailsDto() {}
 
-    public AlumniDetailsDto(Long alumniId, String fullName, String facultyNumber, LocalDate birthDate, Long facultyId) {
-        this.alumniId = alumniId;
-        this.fullName = fullName;
+    public Integer getFacultyNumber() {
+        return facultyNumber;
+    }
+
+    public void setFacultyNumber(Integer facultyNumber) {
         this.facultyNumber = facultyNumber;
-        this.birthDate = birthDate;
-        this.facultyId = facultyId;
-    }
-
-    public Long getAlumniId() {
-        return alumniId;
-    }
-
-    public void setAlumniId(Long alumniId) {
-        this.alumniId = alumniId;
     }
 
     public String getFullName() {
@@ -35,14 +27,6 @@ public class AlumniDetailsDto {
         this.fullName = fullName;
     }
 
-    public String getFacultyNumber() {
-        return facultyNumber;
-    }
-
-    public void setFacultyNumber(String facultyNumber) {
-        this.facultyNumber = facultyNumber;
-    }
-
     public LocalDate getBirthDate() {
         return birthDate;
     }
@@ -51,11 +35,11 @@ public class AlumniDetailsDto {
         this.birthDate = birthDate;
     }
 
-    public Long getFacultyId() {
+    public Integer getFaculty() {
         return facultyId;
     }
 
-    public void setFacultyId(Long facultyId) {
-        this.facultyId = facultyId;
+    public void setFaculty(Integer faculty) {
+        this.facultyId = faculty;
     }
 }

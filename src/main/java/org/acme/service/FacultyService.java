@@ -1,12 +1,14 @@
 package org.acme.service;
 
 import org.acme.dto.FacultyDto;
-import org.acme.entites.Faculties;
+import org.acme.entites.Faculty;
 
 import java.util.List;
 
-public interface FacultiesService {
+public interface FacultyService {
     FacultyDto getFacultyById(long id);
+    Faculty getFacultyByIdE(long id);
+    Faculty getFacultyByNameE(String name);
     FacultyDto getFacultyByName(String name);
     List<FacultyDto> getAllFaculties();
 

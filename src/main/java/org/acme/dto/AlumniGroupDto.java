@@ -1,52 +1,36 @@
 package org.acme.dto;
 
-public class AlumniGroupDto {
-    private Long membershipId;
-    private Long alumniId;
-    private Long groupId;
+import org.acme.entites.AlumniGroupsMembership;
+import org.acme.entites.Faculty;
+import org.acme.entites.Speciality;
 
+import java.util.ArrayList;
+
+public class AlumniGroupDto {
+
+    private Integer id;
+    private FacultyDto faculty;
     private int groupNumber;
     private int graduationYear;
-    private Long specialityId;
-
-    private double averageScore;
+    private SpecialityDto speciality;
+    private ArrayList<AlumniGroupsMembershipDto> memberships;
 
     public AlumniGroupDto() {}
 
-    public AlumniGroupDto(Long membershipId, Long alumniId, Long groupId,
-                          int groupNumber, int graduationYear, Long specialityId,
-                          double averageScore) {
-        this.membershipId = membershipId;
-        this.alumniId = alumniId;
-        this.groupId = groupId;
-        this.groupNumber = groupNumber;
-        this.graduationYear = graduationYear;
-        this.specialityId = specialityId;
-        this.averageScore = averageScore;
+    public Integer getId() {
+        return id;
     }
 
-    public Long getMembershipId() {
-        return membershipId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setMembershipId(Long membershipId) {
-        this.membershipId = membershipId;
+    public FacultyDto getFaculty() {
+        return faculty;
     }
 
-    public Long getAlumniId() {
-        return alumniId;
-    }
-
-    public void setAlumniId(Long alumniId) {
-        this.alumniId = alumniId;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setFaculty(FacultyDto faculty) {
+        this.faculty = faculty;
     }
 
     public int getGroupNumber() {
@@ -65,19 +49,19 @@ public class AlumniGroupDto {
         this.graduationYear = graduationYear;
     }
 
-    public Long getSpecialityId() {
-        return specialityId;
+    public SpecialityDto getSpeciality() {
+        return speciality;
     }
 
-    public void setSpecialityId(Long specialityId) {
-        this.specialityId = specialityId;
+    public void setSpeciality(SpecialityDto speciality) {
+        this.speciality = speciality;
     }
 
-    public double getAverageScore() {
-        return averageScore;
+    public ArrayList<AlumniGroupsMembershipDto> getMemberships() {
+        return memberships;
     }
 
-    public void setAverageScore(double averageScore) {
-        this.averageScore = averageScore;
+    public void setMemberships(ArrayList<AlumniGroupsMembershipDto> memberships) {
+        this.memberships = memberships;
     }
 }
