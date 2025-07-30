@@ -34,6 +34,11 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven/</url>
         </repository>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/OleksPorokhnia/alumni-avro-schemas</url>
+        </repository>
     </repositories>
 
 
@@ -92,7 +97,7 @@
         <dependency>
             <groupId>com.alex.project</groupId>
             <artifactId>avro-alumni-schemas</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
