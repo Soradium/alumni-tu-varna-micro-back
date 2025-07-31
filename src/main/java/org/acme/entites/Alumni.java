@@ -77,7 +77,7 @@ public class Alumni extends PanacheEntityBase {
         this.degree = degree;
     }
 
-    
+
 
 
 }

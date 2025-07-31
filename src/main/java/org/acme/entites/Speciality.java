@@ -18,7 +18,7 @@ public class Speciality extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "speciality_id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @NotBlank
@@ -29,11 +29,11 @@ public class Speciality extends PanacheEntityBase {
     public Speciality() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
