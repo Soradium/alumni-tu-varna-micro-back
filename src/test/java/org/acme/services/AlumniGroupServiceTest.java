@@ -1,6 +1,5 @@
 package org.acme.services;
 
-import jakarta.inject.Inject;
 import org.acme.dto.AlumniGroupDto;
 import org.acme.dto.AlumniGroupsMembershipDto;
 import org.acme.dto.FacultyDto;
@@ -23,9 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -146,10 +143,6 @@ public class AlumniGroupServiceTest {
         assertEquals(dto.getMemberships().getFirst().getId(), result.getMemberships().get(0).getId());
     }
 
-    // createAlumniGroup()
-    //test Faculty or Speciality not found, then throw exception
-    //Alumni not found for a membership, throw exception
-
     @Test
     void testUpdateAlumniGroup_success() throws Exception {
 
@@ -200,13 +193,50 @@ public class AlumniGroupServiceTest {
         assertEquals(321, result.getGroupNumber());
         assertEquals(2, group.getMemberships().size());
     }
-    //Alumni/group not found, throw exception
-    //Alumni already in group, then IllegalStateException
 
+    @Test
+    void testAssignToGroup_groupNotFound() throws Exception {
+        AlumniGroupsMembershipDto dto = new AlumniGroupsMembershipDto();
+        dto.setFacultyNumber(22221111);
+        dto.setGroupNumber(321);
 
-//
-//    @Test
-//    void testAssignToGroup_alreadyMember() throws Exception {
-//
-//    }
+        Alumni alumni = new Alumni();
+        alumni.setFacultyNumber(22221111);
+
+        when(alumniService.getAlumniByIdE(22221111)).thenReturn(alumni);
+        when(alumniGroupRepository.findByGroupNumberOptional(321))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            service.assignToGroup(dto);
+        });
+
+        verify(alumniGroupRepository, never()).persist(any(AlumniGroup.class));
+    }
+
+    @Test
+    void testAssignToGroup_alreadyMember() throws Exception {
+        AlumniGroupsMembershipDto dto = new AlumniGroupsMembershipDto();
+        dto.setFacultyNumber(22221111);
+        dto.setGroupNumber(321);
+
+        Alumni alumni = new Alumni();
+        alumni.setFacultyNumber(22221111);
+
+        AlumniGroup group = new AlumniGroup();
+        group.setGroupNumber(321);
+
+        AlumniGroupsMembership existingMembership = new AlumniGroupsMembership();
+        existingMembership.setAlumni(alumni);
+        group.setMemberships(new ArrayList<>(List.of(existingMembership)));
+
+        when(alumniService.getAlumniByIdE(22221111)).thenReturn(alumni);
+        when(alumniGroupRepository.findByGroupNumberOptional(321)).thenReturn(Optional.of(group));
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.assignToGroup(dto);
+        });
+
+        verify(alumniGroupRepository, never()).persist(any(AlumniGroup.class));
+    }
 }

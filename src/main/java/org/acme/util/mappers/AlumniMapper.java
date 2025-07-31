@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class AlumniMapper {
     @Inject
-    DegreeMapper degreeMapper;
+    public DegreeMapper degreeMapper;
     @Inject
-    AlumniGroupsMembershipMapper membershipMapper;
+    public AlumniGroupsMembershipMapper membershipMapper;
 
 
     public AlumniDto toDto(Alumni alumni){
