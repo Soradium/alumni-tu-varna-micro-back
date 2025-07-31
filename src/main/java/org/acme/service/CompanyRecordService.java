@@ -13,8 +13,10 @@ public interface CompanyRecordService {
     List<CompanyDto> createCompanyRecord(long id, List<CompanyDto> companyDtoList);
     CompanyDto updateCompanyRecord(long id,CompanyDto companyDto) throws Exception;
     List<CompanyDto> updateCompanyRecord(List<Pair<CompanyRecord, CompanyDto>> updates);
-    List<CompanyDto> mergeCompanyRecords(long alumniId,  List<CompanyRecord> dbRecords,
-                             List<CompanyDto> apiRecords) throws Exception;
+    List<CompanyDto> mergeCompanyRecords(
+        long alumniId,  
+        List<CompanyRecord> dbRecords,
+        List<CompanyDto> apiRecords) throws Exception;
 
 
 }
