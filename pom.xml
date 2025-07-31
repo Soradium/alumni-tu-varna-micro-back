@@ -34,6 +34,11 @@
             <id>confluent</id>
             <url>https://packages.confluent.io/maven/</url>
         </repository>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/OleksPorokhnia/alumni-avro-schemas</url>
+        </repository>
     </repositories>
 
 
@@ -90,6 +95,22 @@
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.alex.project</groupId>
+            <artifactId>avro-alumni-schemas</artifactId>
+            <version>1.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>7.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-confluent-registry-avro</artifactId>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.14.0</version>
