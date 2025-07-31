@@ -6,6 +6,8 @@ import org.acme.avro.AlumniGroupDto;
 import org.acme.util.CorrelationIdMetadata;
 import org.eclipse.microprofile.reactive.messaging.*;
 
+import java.util.concurrent.CompletionStage;
+
 @ApplicationScoped
 public class AlumniGroupConsumer {
 
@@ -14,7 +16,7 @@ public class AlumniGroupConsumer {
     Emitter<Message<AlumniGroupDto>> replyEmitter; //chanel for responses
 
     @Incoming("alumni-group-data-in")//chanel for requests
-    public void consume(Message<AlumniGroupDto> alumni) {
+    public CompletionStage<Void> consume(Message<AlumniGroupDto> alumni) {
         AlumniGroupDto request = alumni.getPayload(); // get data from message
 
         //implement business logic
@@ -31,6 +33,6 @@ public class AlumniGroupConsumer {
 
         Message<AlumniGroupDto> replyMessage = Message.of(alumniGroupDto).
                 withMetadata(metadata);//configure message
-        replyEmitter.send(replyMessage);//response
+        return replyEmitter.send(replyMessage);//response
     }
 }
