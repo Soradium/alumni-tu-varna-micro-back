@@ -3,8 +3,8 @@ package org.acme.dto;
 import java.time.LocalDate;
 
 public class CompanyDto {
-    private Long id;
-    private Long alumniId;
+    private Integer id;
+    private Integer facultyNumber;
     private LocalDate enrollmentDate;
     private LocalDate dischargeDate;
     private String positionName;
@@ -12,29 +12,29 @@ public class CompanyDto {
 
     public CompanyDto() {}
 
-    public CompanyDto(Long id, Long alumniId, LocalDate enrollmentDate, LocalDate dischargeDate, String positionName, String companyName) {
+    public CompanyDto(Integer id, Integer facultyNumber, LocalDate enrollmentDate, LocalDate dischargeDate, String positionName, String companyName) {
         this.id = id;
-        this.alumniId = alumniId;
+        this.facultyNumber = facultyNumber;
         this.enrollmentDate = enrollmentDate;
         this.dischargeDate = dischargeDate;
         this.positionName = positionName;
         this.companyName = companyName;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getAlumniId() {
-        return alumniId;
+    public Integer getAlumniId() {
+        return facultyNumber;
     }
 
-    public void setAlumniId(Long alumniId) {
-        this.alumniId = alumniId;
+    public void setAlumniId(Integer alumniId) {
+        this.facultyNumber = alumniId;
     }
 
     public LocalDate getEnrollmentDate() {
@@ -53,19 +53,19 @@ public class CompanyDto {
         this.dischargeDate = dischargeDate;
     }
 
-    public String getpositionName() {
+    public String getPositionName() {
         return positionName;
     }
 
-    public void setpositionName(String positionName) {
+    public void setPositionName(String positionName) {
         this.positionName = positionName;
     }
 
-    public String getcompanyName() {
+    public String getCompanyName() {
         return companyName;
     }
 
-    public void setcompanyName(String companyName) {
+    public void setCompanyName(String companyName) {
         this.companyName = companyName;
     }
 }
