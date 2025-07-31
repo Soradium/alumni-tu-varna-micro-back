@@ -1,6 +1,5 @@
 package org.acme.services;
 
-import jakarta.ws.rs.NotFoundException;
 import org.acme.api.CompanyGetterApi;
 import org.acme.dto.CompanyDto;
 import org.acme.entites.Alumni;
@@ -11,6 +10,7 @@ import org.acme.repository.AlumniRepository;
 import org.acme.repository.CompanyRecordsRepository;
 import org.acme.service.implementation.CompanyRecordServiceImpl;
 import org.acme.util.mappers.CompanyMapper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -209,14 +209,20 @@ public class CompanyServiceTest {
         toUpdateDto.setCompanyName("A");
         toUpdateDto.setPositionName("QA Lead");
 
+        Alumni a = new Alumni();
+        a.setFacultyNumber((int) validId);
+
         List<CompanyDto> apiList = List.of(newDto, toUpdateDto);
 
         when(companyRecordsRepository.findByAlumniId(validId)).thenReturn(dbList);
         when(companyGetterApi.getCompaniesPerAlumni((int)validId)).thenReturn(apiList);
+        when(alumniRepository.findByIdOptional(validId)).thenReturn(Optional.of(a));
 
-        CompanyRecordServiceImpl spyService = spy(service);
-        doReturn(List.of(newDto)).when(spyService).createCompanyRecord(validId, anyList());
-        doReturn(List.of(toUpdateDto)).when(spyService).updateCompanyRecord(anyList());
+        CompanyRecordServiceImpl spyService =
+                spy(service);
+        doReturn(List.of(newDto)).when(spyService).createCompanyRecord(eq(validId), anyList());
+        doReturn(List.of(toUpdateDto)).when(spyService)
+                .updateCompanyRecord((Mockito.<List<Pair<CompanyRecord, CompanyDto>>>any()));
 
         List<CompanyDto> result = spyService.updateCompanyRecordsByAlumniId(validId);
 
@@ -225,7 +231,7 @@ public class CompanyServiceTest {
         expected.add(toUpdateDto);
 
         verify(spyService, times(1)).mergeCompanyRecords(validId, dbList, apiList);
-        verify(spyService, times(1)).createCompanyRecord(validId, anyList());
+        verify(spyService, times(1)).createCompanyRecord(eq(validId), anyList());
         verify(spyService, times(1)).updateCompanyRecord(anyList());
 
         assertEquals(expected, result);

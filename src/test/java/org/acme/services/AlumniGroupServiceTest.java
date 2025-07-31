@@ -40,6 +40,8 @@ public class AlumniGroupServiceTest {
 
     @Spy
     AlumniGroupMapper groupMapper = new AlumniGroupMapper();
+    @Spy
+    AlumniGroupsMembershipMapper membershipMapper = new AlumniGroupsMembershipMapper();
 
     @InjectMocks
     AlumniGroupServiceImpl service;
