@@ -29,8 +29,8 @@ public class CompanyGetterTest {
     public void test_companies_exist_for_valid_alumnus_id() throws Exception{
         int alumnId = 11;
         CompanyDto company = new CompanyDto(
-            Long.valueOf(1),
-            Long.valueOf(2),
+            Integer.valueOf(1),
+            Integer.valueOf(2),
             LocalDate.now(),
             LocalDate.now(),
             "pos",
