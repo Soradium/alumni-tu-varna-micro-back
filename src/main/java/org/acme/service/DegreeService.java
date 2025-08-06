@@ -1,18 +1,19 @@
 package org.acme.service;
 
-import org.acme.dto.DegreeDto;
-import org.acme.entites.Degree;
-
 import java.util.List;
 
+import org.acme.avro.ambiguous.DegreeDto;
+import org.acme.entites.Degree;
+
 public interface DegreeService {
-    DegreeDto getDegreeById(long id);
-    DegreeDto getDegreeByName(String name);
-    Degree getDegreeByNameE(String name);
+    Degree getDegreeById(long id);
+    Degree getDegreeByName(String name);
     List<DegreeDto> getAllDegrees();
 
-    DegreeDto createDegree(DegreeDto degreeDto);
-    DegreeDto updateDegree(long id, DegreeDto degreeDto);
-    DegreeDto deleteDegree(long id);
+    Degree createDegree(DegreeDto degreeDto);
+    Degree updateDegree(DegreeDto degreeDto);
+    void deleteDegree(long id);
 
-}
+    DegreeDto convertDegreeToDto(Degree degree);
+    Degree convertDegreeFromDto(DegreeDto dto);
+} 

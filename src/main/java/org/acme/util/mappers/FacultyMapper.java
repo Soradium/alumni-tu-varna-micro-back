@@ -1,21 +1,14 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import org.acme.dto.FacultyDto;
+import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.entites.Faculty;
+import org.mapstruct.Mapper;
 
+import jakarta.enterprise.context.ApplicationScoped;
+@Mapper(componentModel = "cdi")
 @ApplicationScoped
-public class FacultyMapper {
-    public FacultyDto toDto(Faculty faculty){
-        FacultyDto facultyDto = new FacultyDto();
-        facultyDto.setId(faculty.getId());
-        facultyDto.setFacultyName(faculty.getFacultyName());
-        return facultyDto;
-    }
-
-    public Faculty toEntity(FacultyDto facultyDto){
-        Faculty faculty = new Faculty();
-        faculty.setFacultyName(facultyDto.getFacultyName());
-        return faculty;
-    }
+public abstract class FacultyMapper {
+    public abstract FacultyDto toDto(Faculty entity);
+    public abstract Faculty toEntity(FacultyDto dto);
 }
+

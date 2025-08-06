@@ -1,20 +1,19 @@
 package org.acme.service;
 
-import org.acme.dto.FacultyDto;
-import org.acme.entites.Faculty;
-
 import java.util.List;
 
+import org.acme.avro.ambiguous.FacultyDto;
+import org.acme.entites.Faculty;
+
 public interface FacultyService {
-    FacultyDto getFacultyById(long id);
-    Faculty getFacultyByIdE(long id);
-    Faculty getFacultyByNameE(String name);
-    FacultyDto getFacultyByName(String name);
+    Faculty getFacultyById(long id);
+    Faculty getFacultyByName(String name);
     List<FacultyDto> getAllFaculties();
 
-    FacultyDto createFaculty(FacultyDto faculty);
-    FacultyDto updateFaculty(long id, FacultyDto faculty);
-    FacultyDto deleteFaculty(long id);
+    Faculty createFaculty(FacultyDto facultyDto);
+    Faculty updateFaculty(FacultyDto facultyDto);
+    void deleteFaculty(long id);
 
-    boolean isFacultyExist(String facultyName);
+    FacultyDto convertFacultyToDto(Faculty faculty);
+    Faculty convertFacultyFromDto(FacultyDto dto);
 }

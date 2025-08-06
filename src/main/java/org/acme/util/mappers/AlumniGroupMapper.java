@@ -1,50 +1,52 @@
 package org.acme.util.mappers;
 
+import java.util.ArrayList;
+
+import org.acme.avro.back.AlumniGroupBackDto;
+import org.acme.entites.AlumniGroup;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.acme.dto.AlumniGroupDto;
-import org.acme.dto.AlumniGroupsMembershipDto;
-import org.acme.entites.*;
-import org.acme.repository.FacultyRepository;
-import org.acme.repository.SpecialityRepository;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+@Mapper(componentModel = "cdi", uses = { 
+    FacultyMapper.class, SpecialityMapper.class, AlumniGroupMembershipMapper.class
+})
 @ApplicationScoped
-public class AlumniGroupMapper {
-    @Inject
-    public FacultyMapper facultyMapper;
-    @Inject
-    public SpecialityMapper specialityMapper;
-    @Inject
-    public AlumniGroupsMembershipMapper membershipMapper;
+public abstract class AlumniGroupMapper {
 
-    public AlumniGroupDto toDto(AlumniGroup alumniGroup) {
-        AlumniGroupDto dto = new AlumniGroupDto();
-        dto.setId(alumniGroup.getId());
-        dto.setFaculty(facultyMapper.toDto(alumniGroup.getFaculty()));
-        dto.setGroupNumber(alumniGroup.getGroupNumber());
-        dto.setGraduationYear(alumniGroup.getGraduationYear());
-        dto.setSpeciality(specialityMapper.toDto(alumniGroup.getSpeciality()));
-        dto.setMemberships(
-                alumniGroup.getMemberships().stream().map(membershipMapper::toDto)
-                        .collect(Collectors.toCollection(ArrayList::new))
-        );
-        return dto;
+    
+    private final FacultyMapper facultyMapper;
+    private final SpecialityMapper specialityMapper;
+    private final AlumniGroupMembershipMapper groupMembershipMapper;
+
+    @Inject
+    public AlumniGroupMapper(
+            FacultyMapper facultyMapper, 
+            SpecialityMapper specialityMapper, 
+            AlumniGroupMembershipMapper groupMembershipMapper) {
+        this.facultyMapper = facultyMapper;
+        this.specialityMapper = specialityMapper;
+        this.groupMembershipMapper = groupMembershipMapper;
     }
 
-    public AlumniGroup toEntity(AlumniGroupDto dto, Faculty faculty,
-                                Speciality speciality,
-                                List<AlumniGroupsMembership> memberships) {
+    @Mapping(source = "memberships", target = "membershipIds", qualifiedByName = "extractMembershipIds")
+    public abstract AlumniGroupBackDto toDto(AlumniGroup entity);
+
+    @Named("toAlumniGroupEntity")
+    public AlumniGroup toEntity(AlumniGroupBackDto dto) {
         AlumniGroup entity = new AlumniGroup();
-        entity.setFaculty(faculty);
+
+        entity.setId(dto.getId());
         entity.setGroupNumber(dto.getGroupNumber());
         entity.setGraduationYear(dto.getGraduationYear());
-        entity.setSpeciality(speciality);
-        entity.setMemberships(new ArrayList<>(memberships));
+        entity.setFaculty(facultyMapper.toEntity(dto.getFaculty()));
+        entity.setSpeciality(specialityMapper.toEntity(dto.getSpeciality()));
+        entity.setMemberships((ArrayList) groupMembershipMapper.toBasicEntity(dto.getMembershipIds())); // will probably need enrichment, added by ids
+
         return entity;
     }
 
 }
+

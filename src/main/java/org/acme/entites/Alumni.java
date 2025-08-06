@@ -29,14 +29,6 @@ public class Alumni extends PanacheEntityBase {
     public Alumni() {
     }
 
-    public Degree getDegrees() {
-        return degree;
-    }
-
-    public void setDegrees(Degree degree) {
-        this.degree = degree;
-    }
-
     public ArrayList<AlumniGroupsMembership> getMemberships() {
         return memberships;
     }

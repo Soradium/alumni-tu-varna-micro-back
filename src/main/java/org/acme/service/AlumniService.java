@@ -1,24 +1,26 @@
 package org.acme.service;
 
-import org.acme.dto.AlumniDetailsDto;
-import org.acme.dto.AlumniDto;
-import org.acme.dto.AlumniGroupDto;
-import org.acme.entites.Alumni;
-
 import java.util.List;
 
+import org.acme.avro.back.AlumniDto;
+import org.acme.avro.front.AlumniFrontDto;
+import org.acme.entites.Alumni;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+@ApplicationScoped
 public interface AlumniService {
-    AlumniDto getAlumniById(int alumniId) throws Exception;
-    Alumni getAlumniByIdE(int alumniId) throws Exception;
+    public Alumni getAlumniByFacultyNumber(long facultyNumber) throws Exception;
+    public List<Alumni> getAllAlumni() throws Exception; 
+    public List<AlumniDto> getAllAlumniDto() throws Exception;
+    public List<AlumniDto> getAlumniByDegree(String degree) throws Exception;
 
-    List<AlumniDto> getAllAlumni() throws Exception;
+    public Alumni saveAlumni(Alumni alumni) throws Exception;
+    public Alumni saveAlumni(AlumniFrontDto alumni) throws Exception;
+    public Alumni updateAlumni(Alumni alumni) throws Exception;
+    public Alumni updateAlumni(AlumniFrontDto alumni) throws Exception;
+    public void deleteAlumni(int facultyNumber) throws Exception;
 
-    AlumniDto createAlumni(AlumniDto dto) throws Exception;
-    AlumniDto updateAlumni(int alumniId, AlumniDto dto) throws Exception;
-    AlumniDto deleteAlumni(int alumniId) throws Exception;
-
-    AlumniDetailsDto createAlumniDetails(AlumniDetailsDto dto) throws Exception;
-    AlumniDetailsDto getAlumniDetails(int alumniId) throws Exception;
-    AlumniDetailsDto updateAlumniDetails(int alumniId, AlumniDetailsDto dto) throws Exception;
-
+    public Alumni convertAlumniFromDto(AlumniFrontDto dto) throws Exception;
+    public AlumniDto convertAlumniToDto(Alumni alumni) throws Exception;
 }

@@ -1,13 +1,21 @@
 package org.acme.entites;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
-import java.sql.Timestamp;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "company_records")
@@ -95,4 +103,13 @@ public class CompanyRecord extends PanacheEntityBase {
     public void setCompany(@NotNull @NotBlank @Size(max = 255) String company) {
         this.company = company;
     }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+    
 }
