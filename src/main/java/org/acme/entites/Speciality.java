@@ -29,6 +29,11 @@ public class Speciality extends PanacheEntityBase {
     public Speciality() {
     }
 
+    public Speciality(Integer id, @NotNull @NotBlank @Size(max = 100) String specialityName) {
+        this.id = id;
+        this.specialityName = specialityName;
+    }
+
     public Integer getId() {
         return id;
     }

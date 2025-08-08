@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,12 +19,14 @@ import java.util.List;
 import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
+import org.acme.entites.AlumniDetails;
 import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
 import org.acme.entites.Degree;
 import org.acme.entites.Faculty;
 import org.acme.entites.Speciality;
 import org.acme.service.AlumniService;
+import org.acme.util.mappers.AlumniMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,12 +39,15 @@ public class AlumniServiceTest {
     @InjectMock
     AlumniService alumniService;
 
+    AlumniMapper mapper;
     Alumni sampleAlumni;
+    AlumniDetails sampleDetails;
     AlumniFrontDto sampleFrontDto;
     AlumniDto sampleDto;
 
     @BeforeEach
     public void setup() {
+
         Degree degree = new Degree();
         degree.setId(1);
         degree.setDegree("Computer Science");
@@ -66,7 +72,7 @@ public class AlumniServiceTest {
         membership.setAverageScore(5.5);
         membership.setGroup(group);
 
-        Alumni sampleAlumni = new Alumni();
+        sampleAlumni = new Alumni();
         sampleAlumni.setFacebookUrl("fb.com/test");
         sampleAlumni.setLinkedInUrl("linkedin.com/test");
         sampleAlumni.setDegree(degree);
@@ -95,6 +101,15 @@ public class AlumniServiceTest {
         sampleDto.setCreatedAt(Instant.now());
         sampleDto.setUpdatedAt(Instant.now());
         sampleDto.setMemberships(new ArrayList<>());
+
+        sampleDetails = new AlumniDetails();
+        sampleDetails.setFacultyNumber(12345);
+        sampleDetails.setFullName("John Doe");
+        sampleDetails.setBirthDate(LocalDate.of(2000, 3, 15));
+        sampleDetails.setFaculty(faculty);
+        sampleDetails.setCreatedAt(Timestamp.from(Instant.now()));
+        sampleDetails.setUpdatedAt(Timestamp.from(Instant.now()));
+
     }
 
     @Test
@@ -141,8 +156,8 @@ public class AlumniServiceTest {
 
     @Test
     public void testSaveAlumni_entity() throws Exception {
-        when(alumniService.saveAlumni(sampleAlumni)).thenReturn(sampleAlumni);
-        Alumni result = alumniService.saveAlumni(sampleAlumni);
+        when(alumniService.saveAlumni(sampleAlumni, sampleDetails)).thenReturn(sampleAlumni);
+        Alumni result = alumniService.saveAlumni(sampleAlumni, sampleDetails);
         assertEquals(sampleAlumni.getFacultyNumber(), result.getFacultyNumber());
     }
 
@@ -173,17 +188,4 @@ public class AlumniServiceTest {
         assertDoesNotThrow(() -> alumniService.deleteAlumni(12345));
     }
 
-    @Test
-    public void testConvertAlumniFromDto_valid() throws Exception {
-        when(alumniService.convertAlumniFromDto(sampleFrontDto)).thenReturn(sampleAlumni);
-        Alumni result = alumniService.convertAlumniFromDto(sampleFrontDto);
-        assertEquals(12345, result.getFacultyNumber());
-    }
-
-    @Test
-    public void testConvertAlumniToDto_valid() throws Exception {
-        when(alumniService.convertAlumniToDto(sampleAlumni)).thenReturn(sampleDto);
-        AlumniDto result = alumniService.convertAlumniToDto(sampleAlumni);
-        assertEquals(12345, result.getFacultyNumber());
-    }
 }

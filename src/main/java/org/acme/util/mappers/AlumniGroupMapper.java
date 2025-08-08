@@ -1,7 +1,10 @@
 package org.acme.util.mappers;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
 import org.mapstruct.Mapper;
@@ -16,20 +19,12 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public abstract class AlumniGroupMapper {
 
-    
-    private final FacultyMapper facultyMapper;
-    private final SpecialityMapper specialityMapper;
-    private final AlumniGroupMembershipMapper groupMembershipMapper;
-
     @Inject
-    public AlumniGroupMapper(
-            FacultyMapper facultyMapper, 
-            SpecialityMapper specialityMapper, 
-            AlumniGroupMembershipMapper groupMembershipMapper) {
-        this.facultyMapper = facultyMapper;
-        this.specialityMapper = specialityMapper;
-        this.groupMembershipMapper = groupMembershipMapper;
-    }
+    private FacultyMapper facultyMapper;
+    @Inject
+    private SpecialityMapper specialityMapper;
+    @Inject
+    private AlumniGroupMembershipMapper groupMembershipMapper;
 
     @Mapping(source = "memberships", target = "membershipIds", qualifiedByName = "extractMembershipIds")
     public abstract AlumniGroupBackDto toDto(AlumniGroup entity);
@@ -38,6 +33,7 @@ public abstract class AlumniGroupMapper {
     public AlumniGroup toEntity(AlumniGroupBackDto dto) {
         AlumniGroup entity = new AlumniGroup();
 
+        
         entity.setId(dto.getId());
         entity.setGroupNumber(dto.getGroupNumber());
         entity.setGraduationYear(dto.getGraduationYear());
@@ -47,6 +43,38 @@ public abstract class AlumniGroupMapper {
 
         return entity;
     }
+
+    public List<AlumniGroupBackDto> toDtoList(List<AlumniGroup> list) {
+        return list.stream().map(m -> {
+            AlumniGroupBackDto dto = new AlumniGroupBackDto();
+            
+            dto.setId(dto.getId());
+            dto.setGroupNumber(dto.getGroupNumber());
+            dto.setGraduationYear(dto.getGraduationYear());
+            dto.setFaculty(facultyMapper.toDto(m.getFaculty()));
+            dto.setSpeciality(specialityMapper.toDto(m.getSpeciality()));
+            dto.setMembershipIds((ArrayList) groupMembershipMapper.toBackDtos(m.getMemberships()));
+
+            return dto;
+
+        }).collect(Collectors.toList());
+    }
+
+
+    @Named("toAlumniGroupEntitySimplified")
+    public AlumniGroup toEntitySimplified(AlumniGroupDtoSimplified dto) {
+        AlumniGroup entity = new AlumniGroup();
+
+        entity.setId(dto.getId());
+        entity.setGroupNumber(dto.getGroupNumber());
+        entity.setGraduationYear(dto.getGraduationYear());
+        entity.setFaculty(facultyMapper.toEntity(dto.getFaculty()));
+        entity.setSpeciality(specialityMapper.toEntity(dto.getSpeciality()));
+        entity.setMemberships(new ArrayList<>());
+        
+        return entity;
+    }
+
 
 }
 

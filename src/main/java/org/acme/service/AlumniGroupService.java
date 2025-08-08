@@ -8,24 +8,20 @@ import org.acme.entites.AlumniGroup;
 
 public interface AlumniGroupService {
 
-    AlumniGroup getAlumniGroupById(Integer id);
+    AlumniGroup getAlumniGroupById(Integer id) throws Exception;
+    AlumniGroupBackDto getAlumniGroupDtoById(Integer id) throws Exception;
 
-    List<AlumniGroupBackDto> getAllAlumniGroupsDtoBySpeciality(String speciality);
-    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByFaculty(String faculty);
-    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByGraduationYear(int graduationYear);
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoBySpeciality(String speciality) throws Exception;
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByFaculty(String faculty) throws Exception;
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByGraduationYear(int graduationYear) throws Exception;
 
-    AlumniGroup createAlumniGroups(AlumniGroupDtoSimplified dto);
-    AlumniGroup updateAlumniGroups(AlumniGroupDtoSimplified dto);
+    AlumniGroup createAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception;
+    AlumniGroup updateAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception;
 
-    AlumniGroup createAlumniGroups(AlumniGroup group);
-    AlumniGroup updateAlumniGroups(AlumniGroup group);
+    AlumniGroup createAlumniGroup(AlumniGroup group) throws Exception;
+    AlumniGroup updateAlumniGroup(AlumniGroup group) throws Exception;
 
-    void deleteAlumniGroups(Integer id);
-    void deleteAlumniGroups(AlumniGroupDtoSimplified group);
-    void deleteAlumniGroups(AlumniGroup group);
-
-    AlumniGroupBackDto convertAlumniGroupsToDto(
-        AlumniGroup group);
-    AlumniGroup convertAlumniGroupsFromDto(
-        AlumniGroupDtoSimplified dto);
+    void deleteAlumniGroup(Integer id) throws Exception;
+    void deleteAlumniGroup(AlumniGroupDtoSimplified group) throws Exception;
+    void deleteAlumniGroup(AlumniGroup group) throws Exception;
 }

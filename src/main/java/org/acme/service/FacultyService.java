@@ -6,14 +6,12 @@ import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.entites.Faculty;
 
 public interface FacultyService {
-    Faculty getFacultyById(long id);
-    Faculty getFacultyByName(String name);
-    List<FacultyDto> getAllFaculties();
+    Faculty getFacultyById(long id) throws Exception;
+    Faculty getFacultyByName(String name) throws Exception;
+    List<FacultyDto> getAllFaculties() throws Exception;
 
-    Faculty createFaculty(FacultyDto facultyDto);
-    Faculty updateFaculty(FacultyDto facultyDto);
-    void deleteFaculty(long id);
+    Faculty createFaculty(FacultyDto facultyDto) throws Exception;
+    Faculty updateFaculty(FacultyDto facultyDto) throws Exception;
+    void deleteFaculty(long id) throws Exception;
 
-    FacultyDto convertFacultyToDto(Faculty faculty);
-    Faculty convertFacultyFromDto(FacultyDto dto);
 }

@@ -10,20 +10,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @Mapper(componentModel = "cdi", uses = {
-    SimpleAlumniMapper.class,
+    AlumniMapper.class,
     DateMappingUtils.class,
-    AlumniGroupMapper.class,
-    AlumniGroupMembershipMapper.class
+
 })
 @ApplicationScoped
 public abstract class CompanyRecordMapper {
 
-    private final AlumniMapper alumniMapper;
-    
     @Inject
-    public CompanyRecordMapper(AlumniMapper alumniMapper) {
-        this.alumniMapper = alumniMapper;
-    }
+    private AlumniMapper alumniMapper;
+    @Inject
+    private DateMappingUtils dateMappingUtils;
 
     @Mapping(source = "enrollmentDate", target = "enrollmentDate")
     @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapTimestampToInstant")

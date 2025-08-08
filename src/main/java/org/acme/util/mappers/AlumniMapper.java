@@ -8,6 +8,7 @@ import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
 import org.acme.entites.AlumniDetails;
 import org.acme.entites.Degree;
+import org.acme.entites.Faculty;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -15,7 +16,6 @@ import org.mapstruct.Named;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 @Mapper(componentModel = "cdi", uses = {
-    AlumniGroupMapper.class,
     AlumniGroupMembershipMapper.class,
     FacultyMapper.class,
     DegreeMapper.class, 
@@ -24,17 +24,14 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public abstract class AlumniMapper {    
 
-    private final FacultyMapper facultyMapper;
-    private final AlumniGroupMembershipMapper alumniGroupMembershipMapper;
-    private final DegreeMapper degreeMapper;
-    
     @Inject
-    public AlumniMapper(FacultyMapper facultyMapper, AlumniGroupMembershipMapper alumniGroupMembershipMapper,
-            DegreeMapper degreeMapper) {
-        this.facultyMapper = facultyMapper;
-        this.alumniGroupMembershipMapper = alumniGroupMembershipMapper;
-        this.degreeMapper = degreeMapper;
-    }
+    private FacultyMapper facultyMapper;
+    @Inject
+    private AlumniGroupMembershipMapper alumniGroupMembershipMapper;
+    @Inject
+    private DegreeMapper degreeMapper;
+    @Inject
+    private DateMappingUtils dateMappingUtils;
 
     @Mapping(target = "memberships", source = "alumni.memberships")
     @Mapping(target = "fullName", source = "alumniDetails.fullName")
@@ -56,7 +53,7 @@ public abstract class AlumniMapper {
         alumni.setFacebookUrl(dto.getFacebookUrl());
         alumni.setLinkedInUrl(dto.getLinkedinUrl());
         alumni.setDegree(degreeMapper.toEntity(dto.getDegree()));
-        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toEntity(dto.getMemberships())); 
+        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toEntityList(dto.getMemberships())); 
         return alumni;
     }
 
@@ -83,6 +80,28 @@ public abstract class AlumniMapper {
         alumniDetails.setBirthDate(dto.getBirthDate());
 
         alumniDetails.setFaculty(facultyMapper.toEntity(dto.getFaculty()));
+
+        if (dto.getCreatedAt() != null) {
+            alumniDetails.setCreatedAt(Timestamp.from(dto.getCreatedAt()));
+        }
+
+        if (dto.getUpdatedAt() != null) {
+            alumniDetails.setUpdatedAt(Timestamp.from(dto.getUpdatedAt()));
+        }
+
+        return alumniDetails;
+    }
+
+    @Named("toAlumniDetailsEntityFront")
+    public AlumniDetails toAlumniDetailsEntityFront(AlumniFrontDto dto) {
+        AlumniDetails alumniDetails = new AlumniDetails();
+
+        alumniDetails.setFacultyNumber(dto.getFacultyNumber());
+        alumniDetails.setFullName(dto.getFullName());
+        alumniDetails.setBirthDate(dto.getBirthDate());
+        Faculty f = new Faculty();
+        f.setFacultyName(dto.getFaculty());
+        alumniDetails.setFaculty(f);
 
         if (dto.getCreatedAt() != null) {
             alumniDetails.setCreatedAt(Timestamp.from(dto.getCreatedAt()));
