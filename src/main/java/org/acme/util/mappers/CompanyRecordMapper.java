@@ -1,17 +1,16 @@
 package org.acme.util.mappers;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.back.CompanyRecordDto;
 import org.acme.entites.CompanyRecord;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 @Mapper(componentModel = "cdi", uses = {
-    AlumniMapper.class,
-    DateMappingUtils.class,
+        AlumniMapper.class,
+        DateMappingUtils.class,
 
 })
 @ApplicationScoped
@@ -28,7 +27,7 @@ public abstract class CompanyRecordMapper {
 
     @Named("toCompanyRecordEntity")
     public CompanyRecord toEntity(CompanyRecordDto dto) {
-        if (dto == null || dto.getAlumni() == null ) return null;
+        if (dto == null || dto.getAlumni() == null) return null;
 
         CompanyRecord entity = new CompanyRecord();
 

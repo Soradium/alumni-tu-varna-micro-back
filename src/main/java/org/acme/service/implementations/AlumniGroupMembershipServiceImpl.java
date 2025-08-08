@@ -1,7 +1,7 @@
 package org.acme.service.implementations;
 
-import java.util.List;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.AlumniGroupsMembership;
@@ -12,8 +12,8 @@ import org.acme.service.AlumniGroupMembershipService;
 import org.acme.util.mappers.AlumniGroupMembershipMapper;
 import org.acme.util.mappers.AlumniMapper;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+
 @ApplicationScoped
 public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipService {
 
@@ -23,12 +23,12 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
     private final AlumniGroupMembershipMapper groupMembershipMapper;
     private final AlumniMapper alumniMapper;
 
-    
+
     @Inject
     public AlumniGroupMembershipServiceImpl(AlumniGroupsMembershipRepository membershipRepository,
-            AlumniRepository alumniRepository, AlumniGroupRepository groupRepository,
-            AlumniGroupMembershipMapper groupMembershipMapper,
-            AlumniMapper alumniMapper) {
+                                            AlumniRepository alumniRepository, AlumniGroupRepository groupRepository,
+                                            AlumniGroupMembershipMapper groupMembershipMapper,
+                                            AlumniMapper alumniMapper) {
         this.membershipRepository = membershipRepository;
         this.alumniRepository = alumniRepository;
         this.groupRepository = groupRepository;
@@ -45,16 +45,16 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
         AlumniGroupsMembership membership = groupMembershipMapper.toEntityFront(dto);
 
         membership.setGroup(groupRepository
-            .findByIdOptional((long) dto.getGroupNumber())
-            .orElseThrow(() -> new Exception(
-                "AlumniGroup not found."))
-                );
+                .findByIdOptional((long) dto.getGroupNumber())
+                .orElseThrow(() -> new Exception(
+                        "AlumniGroup not found."))
+        );
         membership.setAlumni(alumniRepository
-            .findByIdOptional((long) dto.getFacultyNumber())
-            .orElseThrow(() -> new Exception(String.format(
-                "Alumni with faculty number %d was not found", 
-                dto.getFacultyNumber())))
-                );
+                .findByIdOptional((long) dto.getFacultyNumber())
+                .orElseThrow(() -> new Exception(String.format(
+                        "Alumni with faculty number %d was not found",
+                        dto.getFacultyNumber())))
+        );
         membership.setAverageScore(dto.getAverageScore());
 
         membershipRepository.persist(membership);
@@ -77,7 +77,7 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
             throw new Exception("Invalid membership ID.");
         }
 
-        boolean deleted = membershipRepository.deleteById((long)id);
+        boolean deleted = membershipRepository.deleteById((long) id);
         if (!deleted) {
             throw new Exception("Membership with ID " + id + " not found.");
         }
@@ -102,7 +102,7 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
     @Override
     public List<AlumniGroupMembershipDto> getAllAlumniGroupMembershipsByFacultyNumber(int facultyNumber) throws Exception {
         List<AlumniGroupsMembership> memberships =
-            membershipRepository.findAllByFacultyNumber(facultyNumber);
+                membershipRepository.findAllByFacultyNumber(facultyNumber);
         return groupMembershipMapper.toBackDtos(memberships);
     }
 
@@ -144,20 +144,20 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
         }
 
         AlumniGroupsMembership existing = membershipRepository
-            .findByIdOptional((long)dto.getId())
-            .orElseThrow(() -> new Exception(
-                "No such group membership was found.")
+                .findByIdOptional((long) dto.getId())
+                .orElseThrow(() -> new Exception(
+                        "No such group membership was found.")
                 );
 
         existing.setAlumni(alumniRepository
-            .findByIdOptional((long) dto.getFacultyNumber())
-            .orElseThrow(() -> new Exception(
-                "No such alumni was found."))
-                );
+                .findByIdOptional((long) dto.getFacultyNumber())
+                .orElseThrow(() -> new Exception(
+                        "No such alumni was found."))
+        );
         existing.setAverageScore(dto.getAverageScore());
         existing.setGroup(groupRepository
-            .findByIdOptional((long) dto.getGroupNumber())
-            .orElseThrow(() -> new Exception("No group with such id number was found.")));
+                .findByIdOptional((long) dto.getGroupNumber())
+                .orElseThrow(() -> new Exception("No group with such id number was found.")));
 
         membershipRepository.persist(existing);
         return existing;
@@ -170,9 +170,9 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
         }
 
         AlumniGroupsMembership existing = membershipRepository
-            .findByIdOptional((long) membership.getId())
-            .orElseThrow(() -> new Exception(
-                "No such group membership was found.")
+                .findByIdOptional((long) membership.getId())
+                .orElseThrow(() -> new Exception(
+                        "No such group membership was found.")
                 );
 
         existing.setAverageScore(membership.getAverageScore());

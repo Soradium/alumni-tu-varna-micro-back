@@ -1,7 +1,7 @@
 package org.acme.service.implementations;
 
-import java.util.List;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
@@ -11,10 +11,10 @@ import org.acme.util.mappers.AlumniGroupMapper;
 import org.acme.util.mappers.FacultyMapper;
 import org.acme.util.mappers.SpecialityMapper;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+
 @ApplicationScoped
-public class AlumniGroupServiceImpl implements AlumniGroupService{
+public class AlumniGroupServiceImpl implements AlumniGroupService {
 
     private final AlumniGroupRepository groupRepository;
     private final AlumniGroupMapper groupMapper;
@@ -23,7 +23,7 @@ public class AlumniGroupServiceImpl implements AlumniGroupService{
 
     @Inject
     public AlumniGroupServiceImpl(AlumniGroupRepository groupRepository, AlumniGroupMapper groupMapper,
-            FacultyMapper facultyMapper, SpecialityMapper specialityMapper) {
+                                  FacultyMapper facultyMapper, SpecialityMapper specialityMapper) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
         this.facultyMapper = facultyMapper;
@@ -32,7 +32,7 @@ public class AlumniGroupServiceImpl implements AlumniGroupService{
 
     @Override
     public AlumniGroup createAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception {
-        if(dto == null) {
+        if (dto == null) {
             throw new NullPointerException();
         }
         AlumniGroup group = groupMapper.toEntitySimplified(dto);
@@ -42,11 +42,11 @@ public class AlumniGroupServiceImpl implements AlumniGroupService{
 
     @Override
     public AlumniGroup createAlumniGroup(AlumniGroup group) throws Exception {
-        if(group == null) {
+        if (group == null) {
             throw new NullPointerException();
         }
         groupRepository.persist(group);
-        return group; 
+        return group;
     }
 
     @Override
@@ -80,36 +80,36 @@ public class AlumniGroupServiceImpl implements AlumniGroupService{
     }
 
     @Override
-    public AlumniGroup getAlumniGroupById(Integer id) throws Exception{
+    public AlumniGroup getAlumniGroupById(Integer id) throws Exception {
         return groupRepository.findByIdOptional((long) id)
-            .orElseThrow(()->new Exception(
-                "No Alumni Group was found."));
-        
+                .orElseThrow(() -> new Exception(
+                        "No Alumni Group was found."));
+
     }
 
     @Override
-    public AlumniGroup updateAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception{
+    public AlumniGroup updateAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception {
         AlumniGroup existing = groupRepository.findByIdOptional((long) dto
-            .getId()).orElseThrow(() -> new Exception(
+                .getId()).orElseThrow(() -> new Exception(
                 "AlumniGroup with such ID does not exist."));
         existing.setFaculty(facultyMapper.toEntity(dto.getFaculty()));
         existing.setGraduationYear(dto.getGraduationYear());
         existing.setGroupNumber(dto.getGroupNumber());
         existing.setSpeciality(specialityMapper
-            .toEntity(dto.getSpeciality()));
+                .toEntity(dto.getSpeciality()));
         groupRepository.persist(existing);
         return existing;
     }
 
     @Override
-    public AlumniGroup updateAlumniGroup(AlumniGroup group) throws Exception{
+    public AlumniGroup updateAlumniGroup(AlumniGroup group) throws Exception {
         AlumniGroup existing = groupRepository.findByIdOptional((long) group.getId()).orElseThrow(() -> new Exception("AlumniGroup with such ID does not exist."));
         existing.setFaculty(group.getFaculty());
         existing.setGraduationYear(group.getGraduationYear());
         existing.setGroupNumber(group.getGroupNumber());
         existing.setSpeciality(group.getSpeciality());
         existing.setMemberships(group.getMemberships());
-        
+
         groupRepository.persist(existing);
         return existing;
     }
@@ -117,8 +117,8 @@ public class AlumniGroupServiceImpl implements AlumniGroupService{
     @Override
     public AlumniGroupBackDto getAlumniGroupDtoById(Integer id) throws Exception {
         return groupMapper.toDto(groupRepository.findByIdOptional((long) id)
-            .orElseThrow(()->new Exception(
-                "No Alumni Group was found.")));
+                .orElseThrow(() -> new Exception(
+                        "No Alumni Group was found.")));
     }
-    
+
 }

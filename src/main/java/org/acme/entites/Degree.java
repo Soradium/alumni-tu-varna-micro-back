@@ -40,5 +40,5 @@ public class Degree extends PanacheEntityBase {
         this.degreeName = degreeName;
     }
 
-    
+
 }

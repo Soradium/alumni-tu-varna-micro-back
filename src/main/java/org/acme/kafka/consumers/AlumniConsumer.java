@@ -1,26 +1,24 @@
 package org.acme.kafka.consumers;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.service.AlumniService;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 @ApplicationScoped
 public class AlumniConsumer {
 
+    private static final Logger logger = LoggerFactory.getLogger(AlumniConsumer.class);
     @Inject
     private AlumniService alumniService;
-    
-    private static final Logger logger = LoggerFactory.getLogger(AlumniConsumer.class);
 
     @Incoming("alumni-save")
     public void saveAlumni(AlumniFrontDto alumni) {
         try {
-        alumniService.saveAlumni(alumni);
+            alumniService.saveAlumni(alumni);
         } catch (Exception e) {
             logger.error("Unable to save alumni" + e);
         }

@@ -1,9 +1,7 @@
 package org.acme.util.mappers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
@@ -11,10 +9,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-@Mapper(componentModel = "cdi", uses = { 
-    FacultyMapper.class, SpecialityMapper.class, AlumniGroupMembershipMapper.class
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Mapper(componentModel = "cdi", uses = {
+        FacultyMapper.class, SpecialityMapper.class, AlumniGroupMembershipMapper.class
 })
 @ApplicationScoped
 public abstract class AlumniGroupMapper {
@@ -33,7 +33,7 @@ public abstract class AlumniGroupMapper {
     public AlumniGroup toEntity(AlumniGroupBackDto dto) {
         AlumniGroup entity = new AlumniGroup();
 
-        
+
         entity.setId(dto.getId());
         entity.setGroupNumber(dto.getGroupNumber());
         entity.setGraduationYear(dto.getGraduationYear());
@@ -47,7 +47,7 @@ public abstract class AlumniGroupMapper {
     public List<AlumniGroupBackDto> toDtoList(List<AlumniGroup> list) {
         return list.stream().map(m -> {
             AlumniGroupBackDto dto = new AlumniGroupBackDto();
-            
+
             dto.setId(dto.getId());
             dto.setGroupNumber(dto.getGroupNumber());
             dto.setGraduationYear(dto.getGraduationYear());
@@ -71,7 +71,7 @@ public abstract class AlumniGroupMapper {
         entity.setFaculty(facultyMapper.toEntity(dto.getFaculty()));
         entity.setSpeciality(specialityMapper.toEntity(dto.getSpeciality()));
         entity.setMemberships(new ArrayList<>());
-        
+
         return entity;
     }
 

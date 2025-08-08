@@ -9,22 +9,18 @@ import java.util.ArrayList;
 @Table(name = "alumni")
 public class Alumni extends PanacheEntityBase {
 
+    @OneToMany(mappedBy = "alumni")
+    public ArrayList<AlumniGroupsMembership> memberships;
     @Id
     @Column(name = "faculty_number")
     private Integer facultyNumber;
-
     @Column(name = "facebook_url")
     private String facebookUrl;
-
     @Column(name = "linkedin_url")
     private String linkedInUrl;
-
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "degree_id")
     private Degree degree;
-
-    @OneToMany(mappedBy = "alumni")
-    public ArrayList<AlumniGroupsMembership> memberships;
 
     public Alumni() {
     }
@@ -68,8 +64,6 @@ public class Alumni extends PanacheEntityBase {
     public void setDegree(Degree degree) {
         this.degree = degree;
     }
-
-
 
 
 }

@@ -1,8 +1,7 @@
 package org.acme.util.mappers;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
@@ -13,16 +12,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
 @Mapper(componentModel = "cdi", uses = {
-    AlumniGroupMembershipMapper.class,
-    FacultyMapper.class,
-    DegreeMapper.class, 
-    DateMappingUtils.class
+        AlumniGroupMembershipMapper.class,
+        FacultyMapper.class,
+        DegreeMapper.class,
+        DateMappingUtils.class
 })
 @ApplicationScoped
-public abstract class AlumniMapper {    
+public abstract class AlumniMapper {
 
     @Inject
     private FacultyMapper facultyMapper;
@@ -53,7 +53,7 @@ public abstract class AlumniMapper {
         alumni.setFacebookUrl(dto.getFacebookUrl());
         alumni.setLinkedInUrl(dto.getLinkedinUrl());
         alumni.setDegree(degreeMapper.toEntity(dto.getDegree()));
-        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toEntityList(dto.getMemberships())); 
+        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toEntityList(dto.getMemberships()));
         return alumni;
     }
 
@@ -66,7 +66,7 @@ public abstract class AlumniMapper {
         alumni.setFacebookUrl(dto.getFacebookUrl());
         alumni.setLinkedInUrl(dto.getLinkedinUrl());
         alumni.setDegree(degree);
-        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toBasicEntity(dto.getMembershipIds())); 
+        alumni.setMemberships((ArrayList) alumniGroupMembershipMapper.toBasicEntity(dto.getMembershipIds()));
         // will require enrichment
         return alumni;
     }

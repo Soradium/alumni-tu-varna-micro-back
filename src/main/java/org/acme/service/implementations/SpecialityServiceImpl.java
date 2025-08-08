@@ -1,16 +1,16 @@
 package org.acme.service.implementations;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.ambiguous.SpecialityDto;
 import org.acme.entites.Speciality;
 import org.acme.repository.SpecialityRepository;
 import org.acme.service.SpecialityService;
 import org.acme.util.mappers.SpecialityMapper;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @ApplicationScoped
 public class SpecialityServiceImpl implements SpecialityService {
 

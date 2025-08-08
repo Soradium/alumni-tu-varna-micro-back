@@ -11,29 +11,24 @@ import java.util.ArrayList;
 @Table(name = "alumni_groups")
 public class AlumniGroup extends PanacheEntityBase {
 
+    @OneToMany(mappedBy = "group")
+    public ArrayList<AlumniGroupsMembership> memberships;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "groups_id")
     private Integer id;
-
     @ManyToOne
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
-
     @Column(name = "group_number")
     private int groupNumber;
-
     @NotNull
     @NotBlank
     @Column(name = "graduation_year")
     private int graduationYear;
-
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinColumn(name = "speciality_id")
     private Speciality speciality;
-
-    @OneToMany(mappedBy = "group")
-    public ArrayList<AlumniGroupsMembership> memberships;
 
     public AlumniGroup() {
     }
@@ -106,5 +101,5 @@ public class AlumniGroup extends PanacheEntityBase {
         this.speciality = speciality;
     }
 
-    
+
 }

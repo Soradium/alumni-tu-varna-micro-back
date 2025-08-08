@@ -1,11 +1,10 @@
 package org.acme.util.mappers;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.avro.back.AlumniDto;
 import org.acme.entites.Alumni;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-import jakarta.enterprise.context.ApplicationScoped;
 
 @Mapper(componentModel = "cdi")
 @ApplicationScoped

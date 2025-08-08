@@ -1,16 +1,16 @@
 package org.acme.service.implementations;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.entites.Faculty;
 import org.acme.repository.FacultyRepository;
 import org.acme.service.FacultyService;
 import org.acme.util.mappers.FacultyMapper;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @ApplicationScoped
 public class FacultyServiceImpl implements FacultyService {
 

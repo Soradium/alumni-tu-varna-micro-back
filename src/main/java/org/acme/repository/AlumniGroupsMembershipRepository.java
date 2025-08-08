@@ -1,13 +1,12 @@
 package org.acme.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class AlumniGroupsMembershipRepository
@@ -23,11 +22,11 @@ public class AlumniGroupsMembershipRepository
     public List<AlumniGroupsMembership> findAllByFacultyNumber(Integer facultyNumber) {
         return find("alumni.facultyNumber", facultyNumber).list();
     }
-    
+
     public List<AlumniGroupsMembership> findAllByGroupId(Integer groupId) {
         return find("group.id", groupId).list();
     }
-    
+
     public Optional<AlumniGroupsMembership> findByGroupIdOptional(Integer groupId) {
         return find("group.id", groupId).firstResultOptional();
     }
@@ -42,5 +41,5 @@ public class AlumniGroupsMembershipRepository
                 .map(AlumniGroupsMembership::getGroup);
     }
 
-    
+
 }

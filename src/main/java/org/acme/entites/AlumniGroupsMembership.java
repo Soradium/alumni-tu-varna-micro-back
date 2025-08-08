@@ -24,7 +24,7 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
     public double averageScore;
 
     public AlumniGroupsMembership() {
-    
+
     }
 
     public Alumni getAlumni() {
@@ -59,5 +59,5 @@ public class AlumniGroupsMembership extends PanacheEntityBase {
         this.id = id;
     }
 
-    
+
 }
