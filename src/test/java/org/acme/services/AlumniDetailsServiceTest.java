@@ -28,7 +28,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+
 public class AlumniDetailsServiceTest {
+
+    @Mock
+PanacheQuery<AlumniDetails> queryMock;
+
 
     @Mock
     private AlumniDetailsRepository detailsRepository;

@@ -1,12 +1,13 @@
 package org.acme.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+
 import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
 import org.acme.entites.AlumniDetails;
 
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public interface AlumniService {
@@ -29,5 +30,6 @@ public interface AlumniService {
     Alumni updateAlumni(AlumniFrontDto alumni) throws Exception;
 
     void deleteAlumni(int facultyNumber) throws Exception;
+
 
 }

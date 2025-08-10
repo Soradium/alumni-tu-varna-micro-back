@@ -1,7 +1,8 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
 import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
@@ -12,8 +13,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @Mapper(componentModel = "cdi", uses = {
         AlumniGroupMembershipMapper.class,
