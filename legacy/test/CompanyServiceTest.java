@@ -9,7 +9,7 @@ import org.acme.exceptions.ResourceNotFoundException;
 import org.acme.repository.AlumniRepository;
 import org.acme.repository.CompanyRecordsRepository;
 import org.acme.service.implementation.CompanyRecordServiceImpl;
-import org.acme.util.mappers.CompanyMapper;
+import org.acme.util.mappers.CompanyRecordMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class CompanyServiceTest {
         companyRecordsRepository = Mockito.mock(CompanyRecordsRepository.class);
         companyGetterApi = Mockito.mock(CompanyGetterApi.class);
         alumniRepository = Mockito.mock(AlumniRepository.class);
-        CompanyMapper companyMapper = new CompanyMapper();
+        CompanyRecordMapper companyMapper = new CompanyRecordMapper();
         service = new CompanyRecordServiceImpl(companyRecordsRepository,
                 alumniRepository, companyGetterApi,companyMapper);
     }

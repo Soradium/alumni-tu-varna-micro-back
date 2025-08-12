@@ -1,20 +1,21 @@
 package org.acme.service;
 
-import org.acme.dto.FacultyDto;
+import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.entites.Faculty;
 
 import java.util.List;
 
 public interface FacultyService {
-    FacultyDto getFacultyById(long id);
-    Faculty getFacultyByIdE(long id);
-    Faculty getFacultyByNameE(String name);
-    FacultyDto getFacultyByName(String name);
-    List<FacultyDto> getAllFaculties();
+    Faculty getFacultyById(long id) throws Exception;
 
-    FacultyDto createFaculty(FacultyDto faculty);
-    FacultyDto updateFaculty(long id, FacultyDto faculty);
-    FacultyDto deleteFaculty(long id);
+    Faculty getFacultyByName(String name) throws Exception;
 
-    boolean isFacultyExist(String facultyName);
+    List<FacultyDto> getAllFaculties() throws Exception;
+
+    Faculty createFaculty(FacultyDto facultyDto) throws Exception;
+
+    Faculty updateFaculty(FacultyDto facultyDto) throws Exception;
+
+    void deleteFaculty(long id) throws Exception;
+
 }

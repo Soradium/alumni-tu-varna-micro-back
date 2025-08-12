@@ -1,0 +1,177 @@
+[
+    {
+        "type": "record",
+        "namespace": "org.acme.avro",
+        "name": "AlumniGroupDto",
+        "fields":[
+            {
+                "name":"id", "type":"int"
+            },
+            {
+                "name":"faculty", "type":"string"
+            },
+            {
+                "name":"group_number", "type":"int"
+            },
+            {
+                "name":"graduation_year", "type":"int"
+            },
+            {
+                "name":"speciality_name", "type":"string"
+            }
+        ]
+    },
+    {
+        "type": "record",
+        "namespace": "org.acme.avro",
+        "name": "AlumniDtoInput",
+        "fields": [
+            { "name": "faculty_number", "type": "int" },
+            { "name": "full_name", "type": "string" },
+            {
+            "name": "birth_date",
+            "type": ["null", { "type": "int", "logicalType": "date" }],
+            "default": null
+            },
+            {
+            "name": "facebook_url",
+            "type": ["null", "string"],
+            "default": null
+            },
+            {
+            "name": "linkedin_url",
+            "type": ["null", "string"],
+            "default": null
+            },
+            {
+            "name": "memberships",
+            "type": {
+                "type": "array",
+                "items": "int"
+            }
+            },
+            { "name": "degree", "type": "string" },
+            {
+            "name": "faculty",
+            "type": ["null", "string"],
+            "default": null
+            }
+        ]
+    },
+    {
+        "type": "record",
+        "namespace": "org.acme.avro",
+        "name": "AlumniGroupMembershipDto",
+        "fields":[
+            {
+                "name":"id", "type":"int"
+            },
+            {
+                "name":"faculty_number", "type":"int"
+            },
+            {
+                "name":"group", "type":"org.acme.avro.AlumniGroupDto"
+            },
+            {
+                "name": "average_score",
+                "type": ["null", "double"], "default": null
+            }
+        ]
+    },
+    {
+        "type": "record",
+        "namespace": "org.acme.avro",
+        "name": "AlumniDtoOutput",
+        "fields": [
+            {
+                "name": "faculty_number",
+                "type": "int"
+            },
+            {
+                "name": "full_name",
+                "type": "string"
+            },
+            {
+                "name": "birth_date",
+                "type": ["null", { "type": "int", "logicalType": "date" }],
+                "default": null
+            },
+            {
+                "name": "facebook_url",
+                "type": ["null", "string"],
+                "default": null
+            },
+            {
+                "name": "linkedin_url",
+                "type": ["null", "string"],
+                "default": null
+            },
+            {
+                "name": "degree",
+                "type": "string"
+            },
+            {
+                "name": "faculty",
+                "type": ["null", "string"],
+                "default": null
+            },
+            {
+                "name": "created_at",
+                "type": {
+                    "type": "long",
+                    "logicalType": "timestamp-millis"
+                }
+            },
+            {
+                "name": "updated_at",
+                "type": {
+                    "type": "long",
+                    "logicalType": "timestamp-millis"
+                }
+            },
+            {
+                "name": "memberships",
+                "type": {
+                    "type": "array",
+                    "items": "org.acme.avro.AlumniGroupMembershipDto"
+                }
+            }
+        ]
+    },
+    {
+        "type": "record",
+        "namespace": "org.acme.avro",
+        "name": "CompanyRecordDto",
+        "fields":[
+            {
+                "name":"id", "type":"int"
+            },
+            {
+                "name":"alumni", "type":"org.acme.avro.AlumniDtoOutput"
+            },
+            {
+                "name":"enrollment_date", "type": {
+                "type":"long",
+                "logicalType":"date"
+            }
+            },
+            {
+                "name":"discharge_date",
+                "type": ["null", { "type":"long", "logicalType":"date" }],
+                "default": null
+            },
+            {
+                "name":"position","type":"string"
+            },
+            {
+                "name":"company","type":"string"
+            },
+            {
+                "name":"created_at", "type": {
+                "type":"long",
+                "logicalType":"timestamp-millis"
+            }
+            }
+        ]
+    }
+]

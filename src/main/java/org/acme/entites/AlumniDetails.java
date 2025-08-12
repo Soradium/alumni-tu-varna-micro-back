@@ -37,7 +37,7 @@ public class AlumniDetails extends PanacheEntityBase {
     private Timestamp updatedAt;
 
     public AlumniDetails() {
-        
+
     }
 
     public @NotNull @NotBlank @Size(max = 255) String getFullName() {
@@ -96,5 +96,5 @@ public class AlumniDetails extends PanacheEntityBase {
         this.updatedAt = updatedAt;
     }
 
-    
+
 }

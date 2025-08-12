@@ -19,7 +19,7 @@ public class Degree extends PanacheEntityBase {
     @NotBlank
     @Size(max = 100)
     @Column(name = "degree_name")
-    private String degree;
+    private String degreeName;
 
     public Degree() {
     }
@@ -32,13 +32,13 @@ public class Degree extends PanacheEntityBase {
         this.id = id;
     }
 
-    public @NotNull @NotBlank @Size(max = 100) String getDegree() {
-        return degree;
+    public @NotNull @NotBlank @Size(max = 100) String getDegreeName() {
+        return degreeName;
     }
 
-    public void setDegree(@NotNull @NotBlank @Size(max = 100) String degree) {
-        this.degree = degree;
+    public void setDegree(@NotNull @NotBlank @Size(max = 100) String degreeName) {
+        this.degreeName = degreeName;
     }
 
-    
+
 }

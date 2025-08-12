@@ -1,244 +1,233 @@
 package org.acme.services;
 
-import org.acme.dto.AlumniGroupDto;
-import org.acme.dto.AlumniGroupsMembershipDto;
-import org.acme.dto.FacultyDto;
-import org.acme.dto.SpecialityDto;
-import org.acme.entites.*;
-import org.acme.exceptions.ResourceNotFoundException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
+import org.acme.avro.ambiguous.FacultyDto;
+import org.acme.avro.ambiguous.SpecialityDto;
+import org.acme.avro.back.AlumniGroupBackDto;
+import org.acme.entites.AlumniGroup;
+import org.acme.entites.Faculty;
+import org.acme.entites.Speciality;
 import org.acme.repository.AlumniGroupRepository;
-import org.acme.service.AlumniService;
-import org.acme.service.FacultyService;
-import org.acme.service.SpecialityService;
-import org.acme.service.implementation.AlumniGroupServiceImpl;
+import org.acme.service.implementations.AlumniGroupServiceImpl;
 import org.acme.util.mappers.AlumniGroupMapper;
-import org.acme.util.mappers.AlumniGroupsMembershipMapper;
 import org.acme.util.mappers.FacultyMapper;
 import org.acme.util.mappers.SpecialityMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+@ExtendWith(MockitoExtension.class)
+class AlumniGroupServiceTest {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+    @Mock
+    private AlumniGroupRepository groupRepository;
 
-public class AlumniGroupServiceTest {
     @Mock
-    AlumniGroupRepository alumniGroupRepository;
-    @Mock
-    SpecialityService specialityService;
-    @Mock
-    FacultyService facultyService;
-    @Mock
-    AlumniService alumniService;
+    private AlumniGroupMapper groupMapper;
 
-    @Spy
-    AlumniGroupMapper groupMapper = new AlumniGroupMapper();
-    @Spy
-    AlumniGroupsMembershipMapper membershipMapper = new AlumniGroupsMembershipMapper();
+    @Mock
+    private FacultyMapper facultyMapper;
+
+    @Mock
+    private SpecialityMapper specialityMapper;
 
     @InjectMocks
-    AlumniGroupServiceImpl service;
+    private AlumniGroupServiceImpl service;
+
+    private AlumniGroup group;
+    private AlumniGroupDtoSimplified dto;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        groupMapper.facultyMapper = new FacultyMapper();
-        groupMapper.specialityMapper = new SpecialityMapper();
-        groupMapper.membershipMapper = new AlumniGroupsMembershipMapper();
+        group = new AlumniGroup();
+        group.setId(1);
+
+        dto = new AlumniGroupDtoSimplified();
+        dto.setId(1);
+        dto.setGraduationYear(2020);
+        dto.setGroupNumber(101);
+        dto.setFaculty(new FacultyDto());
+        dto.setSpeciality(new SpecialityDto());
+    }
+
+    // -------- createAlumniGroup(dto) --------
+    @Test
+    void createAlumniGroup_fromDto_success() throws Exception {
+        when(groupMapper.toEntitySimplified(dto)).thenReturn(group);
+
+        AlumniGroup result = service.createAlumniGroup(dto);
+
+        assertEquals(group, result);
+        verify(groupRepository).persist(group);
     }
 
     @Test
-    void testGetAlumniGroupByGroupNumber_success() {
-        Faculty f = new Faculty();
-        f.setId(2);
-        f.setFacultyName("facultyName");
+    void createAlumniGroup_fromDto_nullDto_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.createAlumniGroup((AlumniGroupDtoSimplified) null));
+    }
 
-        Speciality s = new Speciality();
-        s.setId(1);
-        s.setSpecialityName("specialityName");
+    // -------- createAlumniGroup(entity) --------
+    @Test
+    void createAlumniGroup_fromEntity_success() throws Exception {
+        AlumniGroup result = service.createAlumniGroup(group);
 
-        Alumni a = new Alumni();
-        a.setFacultyNumber(22221111);
-
-        AlumniGroupsMembership m = new AlumniGroupsMembership();
-        m.setId(1);
-        m.setAlumni(a);
-        ArrayList<AlumniGroupsMembership> memberships = new ArrayList<>();
-        memberships.add(m);
-
-        a.setMemberships(memberships);
-
-        AlumniGroup group = new AlumniGroup();
-        group.setGroupNumber(22);
-        group.setFaculty(f);
-        group.setSpeciality(s);
-        group.setMemberships(memberships);
-
-        when(alumniGroupRepository.findByGroupNumberOptional(22))
-                .thenReturn(Optional.of(group));
-
-        AlumniGroupDto result = service.getAlumniGroupByGroupNumber(22);
-
-        assertEquals(22, result.getGroupNumber());
-        assertEquals(f.getFacultyName(), result.getFaculty().getFacultyName());
-        assertEquals(s.getSpecialityName(), result.getSpeciality().getSpeciality());
-        assertEquals(memberships.getFirst().getId(), result.getMemberships().get(0).getId());
+        assertEquals(group, result);
+        verify(groupRepository).persist(group);
     }
 
     @Test
-    void testGetAlumniGroupByGroupNumber_notFound() {
-        when(alumniGroupRepository.findByGroupNumberOptional(99)).thenReturn(Optional.empty());
+    void createAlumniGroup_fromEntity_nullEntity_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.createAlumniGroup((AlumniGroup) null));
+    }
 
-        assertThrows(ResourceNotFoundException.class, () -> service.getAlumniGroupByGroupNumber(99));
+    // -------- deleteAlumniGroup(id) --------
+    @Test
+    void deleteAlumniGroup_byId_success() throws Exception {
+        service.deleteAlumniGroup(1);
+        verify(groupRepository).deleteById(1L);
     }
 
     @Test
-    void testCreateAlumniGroup_success() throws Exception {
-        AlumniGroupDto dto = new AlumniGroupDto();
-        dto.setGroupNumber(123);
+    void deleteAlumniGroup_byId_null_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.deleteAlumniGroup((Integer) null));
+    }
 
-        Faculty faculty = new Faculty();
-        faculty.setFacultyName("Engineering");
-        FacultyDto facultyDto = new FacultyDto();
-        facultyDto.setFacultyName("Engineering");
-
-        Speciality speciality = new Speciality();
-        speciality.setId(1);
-        speciality.setSpecialityName("CS");
-        SpecialityDto specialityDto = new SpecialityDto();
-        specialityDto.setSpeciality("CS");
-
-        dto.setFaculty(facultyDto);
-        dto.setSpeciality(specialityDto);
-
-        Alumni a = new Alumni();
-        a.setFacultyNumber(22221111);
-
-        AlumniGroupsMembershipDto mDto = new AlumniGroupsMembershipDto();
-        mDto.setFacultyNumber(22221111);
-        dto.setMemberships(new ArrayList<>(List.of(mDto)));
-
-        AlumniGroupsMembership m = new AlumniGroupsMembership();
-        m.setId(1);
-        m.setAlumni(a);
-
-        a.setMemberships(new ArrayList<>(List.of(m)));
-
-        when(facultyService.getFacultyByNameE("Engineering")).thenReturn(faculty);
-        when(specialityService.getSpecialityByNameE("CS")).thenReturn(speciality);
-        when(alumniService.getAlumniByIdE(22221111)).thenReturn(a);
-
-        doNothing().when(alumniGroupRepository).persist(any(AlumniGroup.class));
-
-        AlumniGroupDto result = service.createAlumniGroup(dto);
-
-        assertEquals(123, result.getGroupNumber());
-        assertEquals(faculty.getFacultyName(), result.getFaculty().getFacultyName());
-        assertEquals(speciality.getSpecialityName(), result.getSpeciality().getSpeciality());
-        assertEquals(dto.getMemberships().getFirst().getId(), result.getMemberships().get(0).getId());
+    // -------- deleteAlumniGroup(dto) --------
+    @Test
+    void deleteAlumniGroup_byDto_success() throws Exception {
+        service.deleteAlumniGroup(dto);
+        verify(groupRepository).deleteById(1L);
     }
 
     @Test
-    void testUpdateAlumniGroup_success() throws Exception {
-
+    void deleteAlumniGroup_byDto_nullDto_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.deleteAlumniGroup((AlumniGroupDtoSimplified) null));
     }
-    //group not found
 
+    // -------- deleteAlumniGroup(entity) --------
     @Test
-    void testAssignToGroup_success() throws Exception {
-        AlumniGroupsMembershipDto dto = new AlumniGroupsMembershipDto();
-        dto.setFacultyNumber(22221111);
-        dto.setGroupNumber(321);
-
-        Faculty faculty = new Faculty();
-        faculty.setId(2);
-        faculty.setFacultyName("Engineering");
-        Speciality speciality = new Speciality();
-        speciality.setId(1);
-        speciality.setSpecialityName("CS");
-
-        Alumni alumni1 = new Alumni();
-        alumni1.setFacultyNumber(22221111);
-
-        Alumni alumni2 = new Alumni();
-        alumni2.setFacultyNumber(22221112);
-
-        AlumniGroupsMembership m = new AlumniGroupsMembership();
-        m.setId(1);
-        m.setAlumni(alumni1);
-
-        AlumniGroupsMembership m2 = new AlumniGroupsMembership();
-        m2.setId(2);
-        m2.setAlumni(alumni2);
-
-        AlumniGroup group = new AlumniGroup();
-        group.setGroupNumber(321);
-        group.setMemberships(new ArrayList<>(List.of(m2)));
-        group.setFaculty(faculty);
-        group.setSpeciality(speciality);
-        alumni1.setMemberships(new ArrayList<>(List.of(m)));
-        alumni2.setMemberships(new ArrayList<>(List.of(m2)));
-
-        when(alumniService.getAlumniByIdE(22221111)).thenReturn(alumni1);
-        when(alumniGroupRepository.findByGroupNumberOptional(321)).thenReturn(Optional.of(group));
-        doNothing().when(alumniGroupRepository).persist(any(AlumniGroup.class));
-
-        AlumniGroupDto result = service.assignToGroup(dto);
-
-        assertEquals(321, result.getGroupNumber());
-        assertEquals(2, group.getMemberships().size());
+    void deleteAlumniGroup_byEntity_success() throws Exception {
+        service.deleteAlumniGroup(group);
+        verify(groupRepository).delete(group);
     }
 
     @Test
-    void testAssignToGroup_groupNotFound() throws Exception {
-        AlumniGroupsMembershipDto dto = new AlumniGroupsMembershipDto();
-        dto.setFacultyNumber(22221111);
-        dto.setGroupNumber(321);
+    void deleteAlumniGroup_byEntity_nullEntity_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.deleteAlumniGroup((AlumniGroup) null));
+    }
 
-        Alumni alumni = new Alumni();
-        alumni.setFacultyNumber(22221111);
+    // -------- getAllAlumniGroupsDtoByFaculty --------
+    @Test
+    void getAllByFaculty_emptyList_returnsEmpty() throws Exception {
+        when(groupRepository.find("faculty.facultyName", "Science").list()).thenReturn(Collections.emptyList());
+        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
 
-        when(alumniService.getAlumniByIdE(22221111)).thenReturn(alumni);
-        when(alumniGroupRepository.findByGroupNumberOptional(321))
-                .thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            service.assignToGroup(dto);
-        });
-
-        verify(alumniGroupRepository, never()).persist(any(AlumniGroup.class));
+        List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoByFaculty("Science");
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void testAssignToGroup_alreadyMember() throws Exception {
-        AlumniGroupsMembershipDto dto = new AlumniGroupsMembershipDto();
-        dto.setFacultyNumber(22221111);
-        dto.setGroupNumber(321);
+    void getAllByFaculty_nullFaculty_throwsException() {
+        assertThrows(NullPointerException.class, () -> service.getAllAlumniGroupsDtoByFaculty(null));
+    }
 
-        Alumni alumni = new Alumni();
-        alumni.setFacultyNumber(22221111);
+    // -------- getAllAlumniGroupsDtoByGraduationYear --------
+    @Test
+    void getAllByGraduationYear_noResults_returnsEmpty() throws Exception {
+        when(groupRepository.find("graduationYear", 2020).list()).thenReturn(Collections.emptyList());
+        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
 
-        AlumniGroup group = new AlumniGroup();
-        group.setGroupNumber(321);
+        List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoByGraduationYear(2020);
+        assertTrue(result.isEmpty());
+    }
 
-        AlumniGroupsMembership existingMembership = new AlumniGroupsMembership();
-        existingMembership.setAlumni(alumni);
-        group.setMemberships(new ArrayList<>(List.of(existingMembership)));
+    // -------- getAllAlumniGroupsDtoBySpeciality --------
+    @Test
+    void getAllBySpeciality_noResults_returnsEmpty() throws Exception {
+        when(groupRepository.find("speciality.specialityName", "Math").list()).thenReturn(Collections.emptyList());
+        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
 
-        when(alumniService.getAlumniByIdE(22221111)).thenReturn(alumni);
-        when(alumniGroupRepository.findByGroupNumberOptional(321)).thenReturn(Optional.of(group));
+        List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoBySpeciality("Math");
+        assertTrue(result.isEmpty());
+    }
 
-        assertThrows(IllegalStateException.class, () -> {
-            service.assignToGroup(dto);
-        });
+    // -------- getAlumniGroupById --------
+    @Test
+    void getById_found_returnsEntity() throws Exception {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
+        AlumniGroup result = service.getAlumniGroupById(1);
+        assertEquals(group, result);
+    }
 
-        verify(alumniGroupRepository, never()).persist(any(AlumniGroup.class));
+    @Test
+    void getById_notFound_throwsException() {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+        assertThrows(Exception.class, () -> service.getAlumniGroupById(1));
+    }
+
+    // -------- updateAlumniGroup(dto) --------
+    @Test
+    void updateFromDto_success() throws Exception {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
+        when(facultyMapper.toEntity(dto.getFaculty())).thenReturn(new Faculty());
+        when(specialityMapper.toEntity(dto.getSpeciality())).thenReturn(new Speciality());
+
+        AlumniGroup updated = service.updateAlumniGroup(dto);
+
+        assertEquals(dto.getGraduationYear(), updated.getGraduationYear());
+        verify(groupRepository).persist(group);
+    }
+
+    @Test
+    void updateFromDto_notFound_throwsException() {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+        assertThrows(Exception.class, () -> service.updateAlumniGroup(dto));
+    }
+
+    // -------- updateAlumniGroup(entity) --------
+    @Test
+    void updateFromEntity_success() throws Exception {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(new AlumniGroup()));
+
+        AlumniGroup updated = service.updateAlumniGroup(group);
+
+        assertEquals(group.getGraduationYear(), updated.getGraduationYear());
+        verify(groupRepository).persist(updated);
+    }
+
+    @Test
+    void updateFromEntity_notFound_throwsException() {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+        assertThrows(Exception.class, () -> service.updateAlumniGroup(group));
+    }
+
+    // -------- getAlumniGroupDtoById --------
+    @Test
+    void getDtoById_found_returnsDto() throws Exception {
+        AlumniGroupBackDto dtoBack = new AlumniGroupBackDto();
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
+        when(groupMapper.toDto(group)).thenReturn(dtoBack);
+
+        AlumniGroupBackDto result = service.getAlumniGroupDtoById(1);
+        assertEquals(dtoBack, result);
+    }
+
+    @Test
+    void getDtoById_notFound_throwsException() {
+        when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+        assertThrows(Exception.class, () -> service.getAlumniGroupDtoById(1));
     }
 }

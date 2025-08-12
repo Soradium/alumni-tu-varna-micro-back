@@ -11,7 +11,7 @@ import org.acme.exceptions.ResourceNotFoundException;
 import org.acme.repository.AlumniRepository;
 import org.acme.repository.CompanyRecordsRepository;
 import org.acme.service.CompanyRecordService;
-import org.acme.util.mappers.CompanyMapper;
+import org.acme.util.mappers.CompanyRecordMapper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -24,10 +24,10 @@ public class CompanyRecordServiceImpl implements CompanyRecordService {
     private final CompanyRecordsRepository companyRecordsRepository;
     private final AlumniRepository alumniRepository;
     private final CompanyGetterApi companyGetterApi;
-    private final CompanyMapper companyMapper;
+    private final CompanyRecordMapper companyMapper;
 
     public CompanyRecordServiceImpl(CompanyRecordsRepository companyRecordsRepository, AlumniRepository alumniRepository,
-                                    CompanyGetterApi companyGetterApi, CompanyMapper companyMapper) {
+                                    CompanyGetterApi companyGetterApi, CompanyRecordMapper companyMapper) {
         this.companyRecordsRepository = companyRecordsRepository;
         this.alumniRepository = alumniRepository;
         this.companyGetterApi = companyGetterApi;

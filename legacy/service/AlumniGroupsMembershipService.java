@@ -1,12 +1,14 @@
 package org.acme.service;
 
-import org.acme.dto.AlumniGroupsMembershipDto;
-
 import java.util.List;
 
+import org.acme.dto.AlumniGroupsMembershipDto;
+import org.acme.entites.AlumniGroupsMembership;
+
 public interface AlumniGroupsMembershipService {
-    AlumniGroupsMembershipDto getMembershipByFN(int id);
+    List<AlumniGroupsMembershipDto> getMembershipsByFN(int id);
     List<AlumniGroupsMembershipDto> getAllMemberships();
+    AlumniGroupsMembership getMembershipById(int id);
 
     AlumniGroupsMembershipDto createMembership(AlumniGroupsMembershipDto dto) throws Exception;
     AlumniGroupsMembershipDto updateMembership(int id, AlumniGroupsMembershipDto dto);

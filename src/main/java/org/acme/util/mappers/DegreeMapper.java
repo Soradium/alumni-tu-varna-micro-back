@@ -1,21 +1,16 @@
 package org.acme.util.mappers;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.acme.dto.DegreeDto;
+import org.acme.avro.ambiguous.DegreeDto;
 import org.acme.entites.Degree;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
+@Mapper(componentModel = "cdi")
 @ApplicationScoped
-public class DegreeMapper {
-    public DegreeDto toDto(Degree degree) {
-        DegreeDto degreeDto = new DegreeDto();
-        degreeDto.setId(degree.getId());
-        degreeDto.setDegree(degree.getDegree());
-        return degreeDto;
-    }
+public abstract class DegreeMapper {
+    public abstract DegreeDto toDto(Degree entity);
 
-    public Degree toEntity(DegreeDto degreeDto) {
-        Degree degree = new Degree();
-        degree.setDegree(degreeDto.getDegree());
-        return degree;
-    }
+    @Mapping(source = "degreeName", target = "degree")
+    public abstract Degree toEntity(DegreeDto dto);
 }

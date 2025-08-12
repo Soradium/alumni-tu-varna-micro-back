@@ -1,19 +1,21 @@
 package org.acme.service;
 
-import org.acme.dto.SpecialityDto;
+import org.acme.avro.ambiguous.SpecialityDto;
 import org.acme.entites.Speciality;
 
 import java.util.List;
 
 public interface SpecialityService {
-    SpecialityDto getSpecialityById(long id);
-    Speciality getSpecialityByNameE(String name);
-    SpecialityDto getSpecialityByName(String name);
-    List<SpecialityDto> getAllSpecialities();
+    Speciality getSpecialityById(long id) throws Exception;
 
-    SpecialityDto createSpeciality(SpecialityDto specialityDto);
-    SpecialityDto updateSpeciality(long id, SpecialityDto specialityDto);
-    SpecialityDto deleteSpeciality(long id);
+    Speciality getSpecialityByName(String name) throws Exception;
 
-    boolean checkSpeciality(String specialityName);
+    List<SpecialityDto> getAllSpecialities() throws Exception;
+
+    Speciality createSpeciality(SpecialityDto specialityDto) throws Exception;
+
+    Speciality updateSpeciality(SpecialityDto specialityDto) throws Exception;
+
+    void deleteSpeciality(long id) throws Exception;
+
 }

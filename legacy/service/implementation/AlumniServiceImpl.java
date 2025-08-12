@@ -3,9 +3,8 @@ package org.acme.service.implementation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.acme.dto.AlumniDetailsDto;
-import org.acme.dto.AlumniDto;
-import org.acme.dto.AlumniGroupsMembershipDto;
+import org.acme.avro.back.AlumniDto;
+import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.entites.*;
 import org.acme.exceptions.IncorrectAlumnusNumberException;
 import org.acme.exceptions.ResourceNotFoundException;
@@ -15,7 +14,7 @@ import org.acme.service.AlumniGroupService;
 import org.acme.service.AlumniService;
 import org.acme.service.DegreeService;
 import org.acme.service.FacultyService;
-import org.acme.util.mappers.AlumniGroupsMembershipMapper;
+import org.acme.util.mappers.AlumniGroupMembershipMapper;
 import org.acme.util.mappers.AlumniMapper;
 
 import java.util.ArrayList;
@@ -24,20 +23,29 @@ import java.util.List;
 @ApplicationScoped
 public class AlumniServiceImpl implements AlumniService {
 
+    private final AlumniRepository alumniRepository;
+    private final AlumniGroupService groupService;
+    private final AlumniDetailsRepository alumniDetailsRepository;
+    private final DegreeService degreeService;
+    private final FacultyService facultyService;
+    private final AlumniMapper alumniMapper;
+    private final AlumniGroupMembershipMapper membershipMapper;
+
+    
     @Inject
-    AlumniRepository alumniRepository;
-    @Inject
-    AlumniGroupService groupService;
-    @Inject
-    AlumniDetailsRepository alumniDetailsRepository;
-    @Inject
-    DegreeService degreeService;
-    @Inject
-    FacultyService facultyService;
-    @Inject
-    AlumniMapper alumniMapper;
-    @Inject
-    AlumniGroupsMembershipMapper membershipMapper;
+    public AlumniServiceImpl(AlumniRepository alumniRepository, AlumniGroupService groupService,
+            AlumniDetailsRepository alumniDetailsRepository, DegreeService degreeService, FacultyService facultyService,
+            AlumniMapper alumniMapper, AlumniGroupMembershipMapper membershipMapper) {
+        this.alumniRepository = alumniRepository;
+        this.groupService = groupService;
+        this.alumniDetailsRepository = alumniDetailsRepository;
+        this.degreeService = degreeService;
+        this.facultyService = facultyService;
+        this.alumniMapper = alumniMapper;
+        this.membershipMapper = membershipMapper;
+    }
+
+
 
     @Override
     public AlumniDto getAlumniById(int alumniId) throws Exception {
@@ -48,6 +56,20 @@ public class AlumniServiceImpl implements AlumniService {
         );
         return alumniMapper.toDto(alumni);
     }
+
+    
+
+    @Override
+    public AlumniDetails getAlumniDetailsByIdE(int alumniId) throws Exception {
+        if(alumniId <= 0)
+            throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
+        AlumniDetails details = alumniDetailsRepository.findByIdOptional((long) alumniId).orElseThrow(
+            () -> new ResourceNotFoundException("Alumni with id " + alumniId + " not found");
+        );
+        return details;
+    }
+
+
 
     @Override
     public Alumni getAlumniByIdE(int alumniId) throws Exception {
@@ -125,34 +147,43 @@ public class AlumniServiceImpl implements AlumniService {
 
     @Override
     @Transactional
-    public AlumniDetailsDto createAlumniDetails(AlumniDetailsDto dto) throws Exception {
-        Faculty f = facultyService.getFacultyByIdE(dto.getFaculty());
+    public AlumniDto createAlumniDetails(AlumniDto dto) throws Exception {
+        Faculty f = facultyService.getFacultyByNameE(dto.getFaculty());
         AlumniDetails newDetails = alumniMapper.toDetailsEntity(dto, f);
         alumniDetailsRepository.persist(newDetails);
         return alumniMapper.toDetailsDto(newDetails);
     }
 
-    @Override
-    public AlumniDetailsDto getAlumniDetails(int alumniId) throws Exception {
-        if(alumniId <= 0)
-            throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
-        AlumniDetails details = alumniDetailsRepository.findByIdOptional((long) alumniId)
-                .orElseThrow(() -> new ResourceNotFoundException("Details for alumnus with id "
-                        + alumniId + " not found"));
-        return alumniMapper.toDetailsDto(details);
-    }
+    // @Override
+    // @Transactional
+    // public AlumniDetailsDto createAlumniDetails(AlumniDetailsDto dto) throws Exception {
+    //     Faculty f = facultyService.getFacultyByIdE(dto.getFaculty());
+    //     AlumniDetails newDetails = alumniMapper.toDetailsEntity(dto, f);
+    //     alumniDetailsRepository.persist(newDetails);
+    //     return alumniMapper.toDetailsDto(newDetails);
+    // }
 
-    @Override
-    @Transactional
-    public AlumniDetailsDto updateAlumniDetails(int alumniId, AlumniDetailsDto dto) throws Exception {
-        if(alumniId <= 0)
-            throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
-        AlumniDetails details = alumniDetailsRepository.findByIdOptional((long) alumniId)
-                .orElseThrow(() -> new ResourceNotFoundException("Details for alumnus with id "
-                        + alumniId + " not found"));
-        Faculty f = facultyService.getFacultyByIdE(dto.getFaculty());
-        alumniMapper.updateDetails(dto, details, f);
-        alumniDetailsRepository.persist(details);
-        return alumniMapper.toDetailsDto(details);
-    }
+    // @Override
+    // public AlumniDetailsDto getAlumniDetails(int alumniId) throws Exception {
+    //     if(alumniId <= 0)
+    //         throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
+    //     AlumniDetails details = alumniDetailsRepository.findByIdOptional((long) alumniId)
+    //             .orElseThrow(() -> new ResourceNotFoundException("Details for alumnus with id "
+    //                     + alumniId + " not found"));
+    //     return alumniMapper.toDetailsDto(details);
+    // }
+
+    // @Override
+    // @Transactional
+    // public AlumniDetailsDto updateAlumniDetails(int alumniId, AlumniDetailsDto dto) throws Exception {
+    //     if(alumniId <= 0)
+    //         throw new IncorrectAlumnusNumberException("Alumnus id value must be positive");
+    //     AlumniDetails details = alumniDetailsRepository.findByIdOptional((long) alumniId)
+    //             .orElseThrow(() -> new ResourceNotFoundException("Details for alumnus with id "
+    //                     + alumniId + " not found"));
+    //     Faculty f = facultyService.getFacultyByIdE(dto.getFaculty());
+    //     alumniMapper.updateDetails(dto, details, f);
+    //     alumniDetailsRepository.persist(details);
+    //     return alumniMapper.toDetailsDto(details);
+    // }
 }

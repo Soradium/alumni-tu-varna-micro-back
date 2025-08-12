@@ -1,8 +1,9 @@
 package org.acme.api.strategies;
 
+import org.acme.avro.back.CompanyRecordDto;
+
 import java.util.List;
-import org.acme.dto.CompanyDto;
 
 public interface CompanyStrategy {
-    public List<CompanyDto> getCompanies(int alumniId);
+    List<CompanyRecordDto> getCompanies(int alumniId);
 }

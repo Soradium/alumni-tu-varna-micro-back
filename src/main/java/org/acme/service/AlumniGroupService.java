@@ -1,17 +1,34 @@
 package org.acme.service;
 
-import org.acme.dto.AlumniGroupDto;
-import org.acme.dto.AlumniGroupsMembershipDto;
+import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
+import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
 
 import java.util.List;
 
 public interface AlumniGroupService {
-    AlumniGroupDto getAlumniGroupByGroupNumber(int groupNumber);
-    AlumniGroup getAlumniGroupByGroupNumberE(int groupNumber);
 
-    AlumniGroupDto createAlumniGroup(AlumniGroupDto dto) throws Exception;
-    AlumniGroupDto updateAlumniGroup(int groupNumber, AlumniGroupDto dto) throws Exception;
+    AlumniGroup getAlumniGroupById(Integer id) throws Exception;
 
-    AlumniGroupDto assignToGroup(AlumniGroupsMembershipDto dto) throws Exception;
+    AlumniGroupBackDto getAlumniGroupDtoById(Integer id) throws Exception;
+
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoBySpeciality(String speciality) throws Exception;
+
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByFaculty(String faculty) throws Exception;
+
+    List<AlumniGroupBackDto> getAllAlumniGroupsDtoByGraduationYear(int graduationYear) throws Exception;
+
+    AlumniGroup createAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception;
+
+    AlumniGroup updateAlumniGroup(AlumniGroupDtoSimplified dto) throws Exception;
+
+    AlumniGroup createAlumniGroup(AlumniGroup group) throws Exception;
+
+    AlumniGroup updateAlumniGroup(AlumniGroup group) throws Exception;
+
+    void deleteAlumniGroup(Integer id) throws Exception;
+
+    void deleteAlumniGroup(AlumniGroupDtoSimplified group) throws Exception;
+
+    void deleteAlumniGroup(AlumniGroup group) throws Exception;
 }

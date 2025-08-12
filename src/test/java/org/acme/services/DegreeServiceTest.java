@@ -1,206 +1,176 @@
 package org.acme.services;
 
-import org.acme.dto.DegreeDto;
-import org.acme.entites.Degree;
-import org.acme.exceptions.ResourceNotFoundException;
-import org.acme.repository.DegreeRepository;
-import org.acme.service.implementation.DegreeServiceImpl;
-import org.acme.util.mappers.DegreeMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static io.smallrye.common.constraint.Assert.assertNotNull;
-import static io.smallrye.common.constraint.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
+import org.acme.avro.ambiguous.DegreeDto;
+import org.acme.entites.Degree;
+import org.acme.repository.DegreeRepository;
+import org.acme.service.implementations.DegreeServiceImpl;
+import org.acme.util.mappers.DegreeMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-public class DegreeServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DegreeServiceTest {
 
     @Mock
-    DegreeRepository degreeRepository;
+    private DegreeRepository degreeRepository;
 
-    @Spy
-    DegreeMapper degreeMapper = new DegreeMapper();
+    @Mock
+    private DegreeMapper degreeMapper;
 
     @InjectMocks
-    DegreeServiceImpl degreeService;
+    private DegreeServiceImpl degreeService;
+
+    private Degree degree;
+    private DegreeDto degreeDto;
 
     @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    // getDegreeById
-
-    @Test
-    void getDegreeById_validId_returnsDto() {
-        Degree degree = new Degree();
+    void setUp() {
+        degree = new Degree();
         degree.setId(1);
-        degree.setDegree("B");
+        degree.setDegree("Computer Science");
 
-        when(degreeRepository.findByIdOptional(1L)).thenReturn(Optional.of(degree));
+        degreeDto = new DegreeDto(1, "Computer Science");
+    }
 
-        DegreeDto result = degreeService.getDegreeById(1L);
+    // --- createDegree ---
+    @Test
+    void createDegree_validInput_persistsAndReturnsEntity() throws Exception {
+        when(degreeMapper.toEntity(degreeDto)).thenReturn(degree);
 
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("B", result.getDegree());
-        verify(degreeRepository).findByIdOptional(1L);
+        Degree result = degreeService.createDegree(degreeDto);
+
+        verify(degreeRepository).persist(degree);
+        assertEquals(degree, result);
+    }
+
+    // --- deleteDegree ---
+    @Test
+    void deleteDegree_invalidId_throwsException() {
+        Exception ex = assertThrows(Exception.class, () -> degreeService.deleteDegree(0));
+        assertEquals("Degree ID entered is incorrect.", ex.getMessage());
+        verify(degreeRepository, never()).deleteById(anyLong());
     }
 
     @Test
-    void getDegreeById_notInDbId_throwsException() {
-        when(degreeRepository.findByIdOptional(99L)).thenReturn(Optional.empty());
-
-        Throwable ex = assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.getDegreeById(99L));
-
-        assertTrue(ex.getMessage().contains("99"));
-        verify(degreeRepository).findByIdOptional(99L);
+    void deleteDegree_validId_callsRepositoryDelete() throws Exception {
+        degreeService.deleteDegree(1L);
+        verify(degreeRepository).deleteById(1L);
     }
 
-    // getDegreeByName
-
+    // --- getAllDegrees ---
     @Test
-    void getDegreeByName_validName_returnsDto() {
-        Degree degree = new Degree();
-        degree.setDegree("d");
+    void getAllDegrees_emptyList_returnsEmptyList() throws Exception {
+        when(degreeRepository.findAll().list()).thenReturn(Collections.emptyList());
 
-        when(degreeRepository.findByNameOptional("d"))
-                .thenReturn(Optional.of(degree));
-
-        DegreeDto result = degreeService.getDegreeByName("d");
-
-        assertNotNull(result);
-        assertEquals("d", result.getDegree());
-        verify(degreeRepository).findByNameOptional("d");
-    }
-
-    @Test
-    void getDegreeByName_nonExistingName_throwsException() {
-        when(degreeRepository.findByNameOptional("Unknown"))
-                .thenReturn(Optional.empty());
-
-        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.getDegreeByName("Unknown"));
-
-        assertTrue(ex.getMessage().contains("Unknown"));
-        verify(degreeRepository).findByNameOptional("Unknown");
-    }
-
-    @Test
-    void getDegreeByName_emptyName_throwsException() {
-        when(degreeRepository.findByNameOptional("")).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.getDegreeByName(""));
-    }
-
-    //getAllDegrees
-
-    @Test
-    void getAllDegrees_nonEmptyList_returnsDtoList() {
-        Degree degree1 = new Degree();
-        degree1.setDegree("d1");
-
-        Degree degree2 = new Degree();
-        degree2.setDegree("d2");
-
-        when(degreeRepository.listAll()).thenReturn(List.of(degree1, degree2));
         List<DegreeDto> result = degreeService.getAllDegrees();
 
-        assertEquals(2, result.size());
-        assertEquals("d1", result.get(0).getDegree());
-        assertEquals("d2", result.get(1).getDegree());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void getAllDegrees_emptyList_throwsException() {
-        when(degreeRepository.listAll()).thenReturn(List.of());
+    void getAllDegrees_nonEmptyList_returnsMappedList() throws Exception {
+        when(degreeRepository.findAll().list()).thenReturn(Arrays.asList(degree));
 
-        Throwable ex = assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.getAllDegrees());
+        List<DegreeDto> result = degreeService.getAllDegrees();
 
-        assertTrue(ex.getMessage().contains("No degrees"));
+        assertEquals(1, result.size());
+        assertEquals("Computer Science", result.get(0).getDegreeName());
     }
 
-    // createDegree
-
+    // --- getDegreeById ---
     @Test
-    void createDegree_validDto_persistsAndReturnsDto() {
-        DegreeDto dto = new DegreeDto();
-        dto.setDegree("d");
-
-//        doNothing().when(facultyRepository).persist(entity);
-//
-//        FacultyDto result = facultyService.createFaculty(dto);
+    void getDegreeById_invalidId_throwsException() {
+        Exception ex = assertThrows(Exception.class, () -> degreeService.getDegreeById(0));
+        assertEquals("Degree ID entered is incorrect.", ex.getMessage());
+        verify(degreeRepository, never()).findById(anyLong());
     }
 
     @Test
-    void createDegree_nullDto_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> degreeService.createDegree(null));
+    void getDegreeById_validId_returnsDegree() throws Exception {
+        when(degreeRepository.findById(1L)).thenReturn(degree);
+
+        Degree result = degreeService.getDegreeById(1L);
+
+        assertEquals(degree, result);
     }
 
-    // updateDegree
-
+    // --- getDegreeByName ---
     @Test
-    void updateDegree_validId_updatesAndReturnsDto() {
-        DegreeDto dto = new DegreeDto();
-        dto.setDegree("d");
-        Degree entity = new Degree();
-        entity.setDegree("OldName");
-
-        when(degreeRepository.findByIdOptional(5L)).thenReturn(Optional.of(entity));
-        doNothing().when(degreeRepository).persist(entity);
-
-        DegreeDto result = degreeService.updateDegree(5L, dto);
-
-        assertEquals("d", result.getDegree());
-        verify(degreeRepository).findByIdOptional(5L);
-        verify(degreeRepository).persist(entity);
+    void getDegreeByName_nullName_throwsException() {
+        Exception ex = assertThrows(Exception.class, () -> degreeService.getDegreeByName(null));
+        assertEquals("Name is null.", ex.getMessage());
     }
 
     @Test
-    void updateDegree_nonExistingId_throwsException() {
-        DegreeDto dto = new DegreeDto();
-        when(degreeRepository.findByIdOptional(10L)).thenReturn(Optional.empty());
+    void getDegreeByName_notFound_throwsException() {
+        when(degreeRepository.findByNameOptional("Math")).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.updateDegree(10L, dto));
-    }
-
-    // deleteDegree
-
-    @Test
-    void deleteDegree_existingId_deletesAndReturnsDto() {
-        Degree entity = new Degree();
-        entity.setDegree("ToDelete");
-
-        when(degreeRepository.findByIdOptional(7L)).thenReturn(Optional.of(entity));
-        doNothing().when(degreeRepository).delete(entity);
-
-        DegreeDto result = degreeService.deleteDegree(7L);
-
-        assertEquals("ToDelete", result.getDegree());
-        verify(degreeRepository).delete(entity);
+        Exception ex = assertThrows(Exception.class, () -> degreeService.getDegreeByName("Math"));
+        assertEquals("No such degree name is found in the system.", ex.getMessage());
     }
 
     @Test
-    void deleteDegree_nonExistingId_throwsException() {
-        when(degreeRepository.findByIdOptional(8L)).thenReturn(Optional.empty());
+    void getDegreeByName_found_returnsDegree() throws Exception {
+        when(degreeRepository.findByNameOptional("Computer Science")).thenReturn(Optional.of(degree));
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> degreeService.deleteDegree(8L));
+        Degree result = degreeService.getDegreeByName("Computer Science");
+
+        assertEquals(degree, result);
     }
 
+    // --- updateDegree ---
+    @Test
+    void updateDegree_nullDto_throwsException() {
+        Exception ex = assertThrows(Exception.class, () -> degreeService.updateDegree(null));
+        assertEquals("degreeDto is null.", ex.getMessage());
+    }
 
+    @Test
+    void updateDegree_notFound_throwsException() {
+        when(degreeRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(Exception.class, () -> degreeService.updateDegree(degreeDto));
+        assertEquals("No degree with such ID was found.", ex.getMessage());
+    }
+
+    @Test
+    void updateDegree_found_updatesAndPersists() throws Exception {
+        when(degreeRepository.findByIdOptional(1L)).thenReturn(Optional.of(degree));
+
+        Degree result = degreeService.updateDegree(degreeDto);
+
+        assertEquals("Computer Science", result.getDegreeName());
+        verify(degreeRepository).persist(degree);
+    }
+
+    // --- convertToDtoList ---
+    @Test
+    void convertToDtoList_emptyList_returnsEmptyList() throws Exception {
+        List<DegreeDto> result = degreeService.convertToDtoList(Collections.emptyList());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void convertToDtoList_nonEmptyList_returnsDtoList() throws Exception {
+        List<DegreeDto> result = degreeService.convertToDtoList(Arrays.asList(degree));
+        assertEquals(1, result.size());
+        assertEquals("Computer Science", result.get(0).getDegreeName());
+    }
 }

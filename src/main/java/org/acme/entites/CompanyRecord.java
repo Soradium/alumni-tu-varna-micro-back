@@ -95,4 +95,13 @@ public class CompanyRecord extends PanacheEntityBase {
     public void setCompany(@NotNull @NotBlank @Size(max = 255) String company) {
         this.company = company;
     }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

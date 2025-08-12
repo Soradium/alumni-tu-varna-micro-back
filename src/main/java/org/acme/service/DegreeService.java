@@ -1,18 +1,21 @@
 package org.acme.service;
 
-import org.acme.dto.DegreeDto;
+import org.acme.avro.ambiguous.DegreeDto;
 import org.acme.entites.Degree;
 
 import java.util.List;
 
 public interface DegreeService {
-    DegreeDto getDegreeById(long id);
-    DegreeDto getDegreeByName(String name);
-    Degree getDegreeByNameE(String name);
-    List<DegreeDto> getAllDegrees();
+    Degree getDegreeById(long id) throws Exception;
 
-    DegreeDto createDegree(DegreeDto degreeDto);
-    DegreeDto updateDegree(long id, DegreeDto degreeDto);
-    DegreeDto deleteDegree(long id);
+    Degree getDegreeByName(String name) throws Exception;
 
-}
+    List<DegreeDto> getAllDegrees() throws Exception;
+
+    Degree createDegree(DegreeDto degreeDto) throws Exception;
+
+    Degree updateDegree(DegreeDto degreeDto) throws Exception;
+
+    void deleteDegree(long id) throws Exception;
+
+} 

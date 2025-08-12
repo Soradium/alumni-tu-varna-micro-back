@@ -8,10 +8,11 @@ import java.util.Optional;
 
 @ApplicationScoped
 public class DegreeRepository implements PanacheRepository<Degree> {
-    public Degree findByName(String degree){
+    public Degree findByName(String degree) {
         return find("degree", degree).firstResult();
     }
-    public Optional<Degree> findByNameOptional(String degree){
+
+    public Optional<Degree> findByNameOptional(String degree) {
         return find("degree", degree).firstResultOptional();
     }
 }
