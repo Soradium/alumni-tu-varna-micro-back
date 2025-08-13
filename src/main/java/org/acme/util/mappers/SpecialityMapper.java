@@ -1,11 +1,13 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.avro.ambiguous.SpecialityDto;
 import org.acme.entites.Speciality;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = "cdi")
+import jakarta.enterprise.context.ApplicationScoped;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA)
 @ApplicationScoped
 public abstract class SpecialityMapper {
     public abstract SpecialityDto toDto(Speciality entity);

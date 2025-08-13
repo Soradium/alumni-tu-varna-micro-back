@@ -1,7 +1,9 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.Alumni;
@@ -9,22 +11,16 @@ import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.enterprise.context.ApplicationScoped;
 
-@Mapper(componentModel = "cdi", uses = {
-        AlumniGroupMapper.class
-
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
 }
 )
 @ApplicationScoped
 public abstract class AlumniGroupMembershipMapper {
-
-    @Inject
-    private AlumniGroupMapper groupMapper;
 
     @Mapping(target = "facultyNumber", source = "alumni.facultyNumber")
     @Mapping(target = "groupBuilder", ignore = true)
@@ -43,7 +39,6 @@ public abstract class AlumniGroupMembershipMapper {
             agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
 
             agm.setAverageScore(m.getAverageScore());
-            agm.setGroup(groupMapper.toEntity(m.getGroup()));
 
             return agm;
         }).collect(Collectors.toList())
@@ -74,8 +69,7 @@ public abstract class AlumniGroupMembershipMapper {
 
     @Named("toEntityFromDtoAlumniGroupMembershipSingle")
     public AlumniGroupsMembership toEntity(
-            AlumniGroupMembershipDto dto
-    ) {
+            AlumniGroupMembershipDto dto) {
         AlumniGroupsMembership agm = new AlumniGroupsMembership();
         agm.setId(dto.getId());
 
@@ -84,7 +78,6 @@ public abstract class AlumniGroupMembershipMapper {
         agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
 
         agm.setAverageScore(dto.getAverageScore());
-        agm.setGroup(groupMapper.toEntity(dto.getGroup()));
 
         return agm;
 
@@ -93,8 +86,7 @@ public abstract class AlumniGroupMembershipMapper {
 
     @Named("toEntityFromDtoAlumniGroupMembershipFrontSingle")
     public AlumniGroupsMembership toEntityFront(
-            AlumniGroupMembershipFrontDto dto
-    ) {
+            AlumniGroupMembershipFrontDto dto) {
         AlumniGroupsMembership agm = new AlumniGroupsMembership();
         agm.setId(dto.getId());
 
@@ -116,7 +108,6 @@ public abstract class AlumniGroupMembershipMapper {
             AlumniGroupMembershipDto dto = new AlumniGroupMembershipDto();
             dto.setAverageScore(m.getAverageScore());
             dto.setFacultyNumber(m.getAlumni().getFacultyNumber());
-            dto.setGroup(groupMapper.toDto(m.getGroup()));
             dto.setId(m.getId());
             return dto;
         }).collect(Collectors.toList());

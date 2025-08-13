@@ -1,13 +1,15 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import org.mapstruct.Mapper;
-import org.mapstruct.Named;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 
-@Mapper(componentModel = "cdi")
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
+
+import jakarta.enterprise.context.ApplicationScoped;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA)
 @ApplicationScoped
 public abstract class DateMappingUtils {
 

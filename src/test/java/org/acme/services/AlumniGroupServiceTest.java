@@ -219,7 +219,6 @@ class AlumniGroupServiceTest {
     void getDtoById_found_returnsDto() throws Exception {
         AlumniGroupBackDto dtoBack = new AlumniGroupBackDto();
         when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
-        when(groupMapper.toDto(group)).thenReturn(dtoBack);
 
         AlumniGroupBackDto result = service.getAlumniGroupDtoById(1);
         assertEquals(dtoBack, result);

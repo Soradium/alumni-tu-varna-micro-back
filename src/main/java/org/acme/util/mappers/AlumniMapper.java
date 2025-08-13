@@ -11,12 +11,13 @@ import org.acme.entites.Degree;
 import org.acme.entites.Faculty;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-@Mapper(componentModel = "cdi", uses = {
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
         AlumniGroupMembershipMapper.class,
         FacultyMapper.class,
         DegreeMapper.class,
@@ -25,13 +26,9 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public abstract class AlumniMapper {
 
-    @Inject
     private FacultyMapper facultyMapper;
-    @Inject
     private AlumniGroupMembershipMapper alumniGroupMembershipMapper;
-    @Inject
     private DegreeMapper degreeMapper;
-    @Inject
     private DateMappingUtils dateMappingUtils;
 
     @Mapping(target = "memberships", source = "alumni.memberships")
@@ -113,5 +110,25 @@ public abstract class AlumniMapper {
         }
 
         return alumniDetails;
+    }
+
+    @Inject
+    public void setFacultyMapper(FacultyMapper facultyMapper) {
+        this.facultyMapper = facultyMapper;
+    }
+
+    @Inject
+    public void setAlumniGroupMembershipMapper(AlumniGroupMembershipMapper alumniGroupMembershipMapper) {
+        this.alumniGroupMembershipMapper = alumniGroupMembershipMapper;
+    }
+
+    @Inject
+    public void setDegreeMapper(DegreeMapper degreeMapper) {
+        this.degreeMapper = degreeMapper;
+    }
+
+    @Inject
+    public void setDateMappingUtils(DateMappingUtils dateMappingUtils) {
+        this.dateMappingUtils = dateMappingUtils;
     }
 }

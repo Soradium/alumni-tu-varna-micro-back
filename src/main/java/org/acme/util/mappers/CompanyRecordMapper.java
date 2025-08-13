@@ -1,14 +1,16 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.acme.avro.back.CompanyRecordDto;
 import org.acme.entites.CompanyRecord;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "cdi", uses = {
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
         AlumniMapper.class,
         DateMappingUtils.class,
 
@@ -16,9 +18,7 @@ import org.mapstruct.Named;
 @ApplicationScoped
 public abstract class CompanyRecordMapper {
 
-    @Inject
     private AlumniMapper alumniMapper;
-    @Inject
     private DateMappingUtils dateMappingUtils;
 
     @Mapping(source = "enrollmentDate", target = "enrollmentDate")
@@ -40,6 +40,16 @@ public abstract class CompanyRecordMapper {
         entity.setAlumni(alumniMapper.toAlumniEntity(dto.getAlumni()));
 
         return entity;
+    }
+
+    @Inject
+    public void setAlumniMapper(AlumniMapper alumniMapper) {
+        this.alumniMapper = alumniMapper;
+    }
+
+    @Inject
+    public void setDateMappingUtils(DateMappingUtils dateMappingUtils) {
+        this.dateMappingUtils = dateMappingUtils;
     }
 
 

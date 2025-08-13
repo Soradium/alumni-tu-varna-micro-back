@@ -1,17 +1,19 @@
 package org.acme.service.implementations;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+
 import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
 import org.acme.repository.AlumniGroupRepository;
+import org.acme.service.AlumniGroupCommonMapperService;
 import org.acme.service.AlumniGroupService;
 import org.acme.util.mappers.AlumniGroupMapper;
 import org.acme.util.mappers.FacultyMapper;
 import org.acme.util.mappers.SpecialityMapper;
 
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AlumniGroupServiceImpl implements AlumniGroupService {
@@ -20,14 +22,17 @@ public class AlumniGroupServiceImpl implements AlumniGroupService {
     private final AlumniGroupMapper groupMapper;
     private final FacultyMapper facultyMapper;
     private final SpecialityMapper specialityMapper;
+    private final AlumniGroupCommonMapperService commonMapper;
 
     @Inject
     public AlumniGroupServiceImpl(AlumniGroupRepository groupRepository, AlumniGroupMapper groupMapper,
-                                  FacultyMapper facultyMapper, SpecialityMapper specialityMapper) {
+                                  FacultyMapper facultyMapper, SpecialityMapper specialityMapper,
+                                  AlumniGroupCommonMapperService commonMapper) {
         this.groupRepository = groupRepository;
         this.groupMapper = groupMapper;
         this.facultyMapper = facultyMapper;
         this.specialityMapper = specialityMapper;
+        this.commonMapper = commonMapper;
     }
 
     @Override
@@ -116,7 +121,7 @@ public class AlumniGroupServiceImpl implements AlumniGroupService {
 
     @Override
     public AlumniGroupBackDto getAlumniGroupDtoById(Integer id) throws Exception {
-        return groupMapper.toDto(groupRepository.findByIdOptional((long) id)
+        return commonMapper.toAlumniGroupDto(groupRepository.findByIdOptional((long) id)
                 .orElseThrow(() -> new Exception(
                         "No Alumni Group was found.")));
     }
