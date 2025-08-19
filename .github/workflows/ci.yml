@@ -21,7 +21,7 @@ jobs:
 
       # Start Postgres first
       - name: Start Postgres
-        run: docker compose -f ./docker/docker-compose.yml up -d db
+        run: docker compose -f ./src/main/docker/docker-compose.yml up -d db
 
       # Wait for Postgres to be ready (5 seconds)
       - name: Wait for Postgres
@@ -31,7 +31,7 @@ jobs:
 
       # Start Kafka
       - name: Start Kafka
-        run: docker compose -f ./docker/docker-compose.yml up -d kafkaservice
+        run: docker compose -f ./src/main/docker/docker-compose.yml up -d kafkaservice
 
       # Wait for Kafka to be ready (15 seconds)
       - name: Wait for Kafka
@@ -41,7 +41,7 @@ jobs:
 
       # Start the app container
       - name: Start App container
-        run: docker compose -f ./docker/docker-compose.yml up -d app
+        run: docker compose -f ./src/main/docker/docker-compose.yml up -d app
 
       # Wait a few seconds for the app to initialize
       - name: Wait for App
