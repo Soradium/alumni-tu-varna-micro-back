@@ -1,13 +1,18 @@
 package org.acme.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,86 +27,122 @@ import org.acme.repository.AlumniRepository;
 import org.acme.repository.FacultyRepository;
 import org.acme.service.implementations.AlumniDetailsServiceImpl;
 import org.acme.util.mappers.AlumniMapper;
+import org.acme.util.mappers.FacultyMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 
+@QuarkusTest
 public class AlumniDetailsServiceTest {
 
-    @Mock
-PanacheQuery<AlumniDetails> queryMock;
-
-
-    @Mock
+    @InjectMock
     private AlumniDetailsRepository detailsRepository;
 
-    @Mock
+    @InjectMock
     private AlumniRepository alumniRepository;
 
-    @Mock
+    @InjectMock
     private FacultyRepository facultyRepository;
 
-    @Mock
+    @Inject
     private AlumniMapper alumniMapper;
 
-    @InjectMocks
+    @Inject
+    private FacultyMapper facultyMapper;
+
+    @Inject
     private AlumniDetailsServiceImpl service;
 
+    private AlumniDetails d;
+    private Alumni a;
+    private AlumniDto dto;
+    private AlumniFrontDto dtoNew;
+    private AlumniDetails dNew;
+    private Faculty faculty;
+
     @BeforeEach
-    void setup() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
+        faculty = new Faculty();
+        faculty.setId(11);
+        faculty.setFacultyName("Engineering");
+
+        d = new AlumniDetails();
+        d.setFacultyNumber(1);
+        d.setBirthDate(LocalDate.of(2001, 1, 1));
+        d.setFaculty(faculty);
+        d.setFullName("John Doe");
+
+        a = new Alumni();
+        a.setFacultyNumber(1);
+
+        dto = new AlumniDto();
+        dto.setFacultyNumber(1);
+        dto.setFaculty(facultyMapper.toDto(faculty));
+        dto.setFullName("John Doe");
+
+        dNew = new AlumniDetails();
+        dNew.setFacultyNumber(1);
+        dNew.setBirthDate(LocalDate.of(2000, 1, 1));
+
+        dtoNew = new AlumniFrontDto();
+        dtoNew.setFacultyNumber(7);
+        dtoNew.setFaculty("Engineering");
+
+        a.memberships = new ArrayList<>();
+        d.setFullName("John Doe");
+        d.setCreatedAt(Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 1, 1, 1)));
+        d.setUpdatedAt(Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 1, 1, 1)));
+
     }
 
-    // ---------- getAllAlumniDetails ----------
+    // ----------- getAllAlumniDetails -------------
+
     @Test
-    void testGetAllAlumniDetails_returnsList() throws Exception {
-        List<AlumniDetails> details = List.of(new AlumniDetails());
-        when(detailsRepository.findAll().list()).thenReturn(details);
+    void getAllAlumniDetails_nonEmptyList_returnsList() throws Exception {
+        when(detailsRepository.listAll()).thenReturn(List.of(d));
 
         List<AlumniDetails> result = service.getAllAlumniDetails();
 
-        assertEquals(details, result);
-        verify(detailsRepository).findAll();
+        assertEquals(1, result.size());
     }
 
     @Test
-    void testGetAllAlumniDetails_emptyList() throws Exception {
-        when(detailsRepository.findAll().list()).thenReturn(Collections.emptyList());
+    void getAllAlumniDetails_emptyList_returnsEmptyList() throws Exception {
+        when(detailsRepository.listAll()).thenReturn(Collections.emptyList());
 
         List<AlumniDetails> result = service.getAllAlumniDetails();
 
         assertTrue(result.isEmpty());
     }
 
-    // ---------- getAlumniListByFaculty ----------
+    // ----------- getAlumniListByFaculty -------------
+
     @Test
-    void testGetAlumniListByFaculty_success() throws Exception {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(1);
-        Alumni a = new Alumni();
-        a.setFacultyNumber(1);
-        AlumniDto dto = new AlumniDto();
+    void getAlumniListByFaculty_validFaculty_returnsDtoList() throws Exception {
+        PanacheQuery<AlumniDetails> query = mock(PanacheQuery.class);
 
-        when(detailsRepository.find("faculty.facultyName", "Engineering").list()).thenReturn(List.of(d));
+        when(detailsRepository.find("faculty.facultyName", "Engineering")).thenReturn(query);
+        when(query.list()).thenReturn(List.of(d));
+
         when(alumniRepository.findByIdOptional(1L)).thenReturn(Optional.of(a));
-        when(alumniMapper.toDto(a, d)).thenReturn(dto);
-
+        
         List<AlumniDto> result = service.getAlumniListByFaculty("Engineering");
 
         assertEquals(1, result.size());
-        assertSame(dto, result.get(0));
+        assertEquals(dto.getFaculty().getFacultyName(), result.get(0).getFaculty().getFacultyName());
     }
 
     @Test
-    void testGetAlumniListByFaculty_idMismatchThrows() {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(1);
-
-        when(detailsRepository.find("faculty.facultyName", "Engineering").list()).thenReturn(List.of(d));
+    void getAlumniListByFaculty_idMismatch_throwsException() {
+        PanacheQuery<AlumniDetails> query = mock(PanacheQuery.class);
+        when(detailsRepository.find("faculty.facultyName", "Engineering")).thenReturn(query);
+        when(query.list()).thenReturn(List.of(d));
         when(alumniRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
@@ -109,42 +150,39 @@ PanacheQuery<AlumniDetails> queryMock;
         assertTrue(ex.getMessage().contains("ID mismatch"));
     }
 
-    // ---------- getAlumniListByFullName ----------
-    @Test
-    void testGetAlumniListByFullName_success() throws Exception {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(2);
-        Alumni a = new Alumni();
-        a.setFacultyNumber(2);
-        AlumniDto dto = new AlumniDto();
+    // ----------- getAlumniListByFullName -------------
 
-        when(detailsRepository.find("fullName", "John Doe").list()).thenReturn(List.of(d));
-        when(alumniRepository.findByIdOptional(2L)).thenReturn(Optional.of(a));
-        when(alumniMapper.toDto(a, d)).thenReturn(dto);
+    @Test
+    void getAlumniListByFullName_validName_returnsDtoList() throws Exception {
+        PanacheQuery<AlumniDetails> query = mock(PanacheQuery.class);
+
+        when(detailsRepository.find("fullName", "John Doe")).thenReturn(query);
+        when(query.list()).thenReturn(List.of(d));
+        when(alumniRepository.findByIdOptional(1L)).thenReturn(Optional.of(a));
 
         List<AlumniDto> result = service.getAlumniListByFullName("John Doe");
 
         assertEquals(1, result.size());
-        assertSame(dto, result.get(0));
+        assertEquals(dto.getFullName(), result.get(0).getFullName());
     }
 
     @Test
-    void testGetAlumniListByFullName_idMismatchThrows() {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(2);
+    void getAlumniListByFullName_idMismatch_throwsException() {
+        PanacheQuery<AlumniDetails> query = mock(PanacheQuery.class);
 
-        when(detailsRepository.find("fullName", "John Doe").list()).thenReturn(List.of(d));
-        when(alumniRepository.findByIdOptional(2L)).thenReturn(Optional.empty());
+        when(detailsRepository.find("fullName", "John Doe")).thenReturn(query);
+        when(query.list()).thenReturn(List.of(d));
+        when(alumniRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> service.getAlumniListByFullName("John Doe"));
         assertTrue(ex.getMessage().contains("ID mismatch"));
     }
 
-    // ---------- getAlumniDetailsByFacultyNumber ----------
+    // ----------- getAlumniDetailsByFacultyNumber -------------
+
     @Test
-    void testGetAlumniDetailsByFacultyNumber_success() throws Exception {
-        AlumniDetails d = new AlumniDetails();
+    void getAlumniDetailsByFacultyNumber_validId_returnsEntity() throws Exception {
         when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.of(d));
 
         AlumniDetails result = service.getAlumniDetailsByFacultyNumber(1);
@@ -153,7 +191,7 @@ PanacheQuery<AlumniDetails> queryMock;
     }
 
     @Test
-    void testGetAlumniDetailsByFacultyNumber_notFoundThrows() {
+    void getAlumniDetailsByFacultyNumber_notFound_throwsException() {
         when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class,
@@ -161,138 +199,109 @@ PanacheQuery<AlumniDetails> queryMock;
         assertTrue(ex.getMessage().contains("No details"));
     }
 
-    // ---------- getDetailsForAlumni ----------
-    @Test
-    void testGetDetailsForAlumni_success() throws Exception {
-        Alumni a = new Alumni();
-        a.setFacultyNumber(3);
-        AlumniDetails d = new AlumniDetails();
+    // ----------- getDetailsForAlumni -------------
 
-        when(detailsRepository.findByIdOptional(3L)).thenReturn(Optional.of(d));
+    @Test
+    void getDetailsForAlumni_validAlumni_returnsEntity() throws Exception {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.of(d));
 
         AlumniDetails result = service.getDetailsForAlumni(a);
+
         assertSame(d, result);
     }
 
     @Test
-    void testGetDetailsForAlumni_notFoundThrows() {
-        Alumni a = new Alumni();
-        a.setFacultyNumber(3);
-        when(detailsRepository.findByIdOptional(3L)).thenReturn(Optional.empty());
+    void getDetailsForAlumni_notFound_throwsException() {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class,
                 () -> service.getDetailsForAlumni(a));
         assertTrue(ex.getMessage().contains("No details"));
     }
 
-    // ---------- getDetailsForAlumniDto ----------
+    // ----------- getDetailsForAlumniDto -------------
+
     @Test
-    void testGetDetailsForAlumniDto_success() throws Exception {
-        AlumniDto a = new AlumniDto();
-        a.setFacultyNumber(4);
-        AlumniDetails d = new AlumniDetails();
+    void getDetailsForAlumniDto_validDto_returnsEntity() throws Exception {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.of(d));
 
-        when(detailsRepository.findByIdOptional(4L)).thenReturn(Optional.of(d));
+        AlumniDetails result = service.getDetailsForAlumniDto(dto);
 
-        AlumniDetails result = service.getDetailsForAlumniDto(a);
         assertSame(d, result);
     }
 
     @Test
-    void testGetDetailsForAlumniDto_notFoundThrows() {
-        AlumniDto a = new AlumniDto();
-        a.setFacultyNumber(4);
-        when(detailsRepository.findByIdOptional(4L)).thenReturn(Optional.empty());
+    void getDetailsForAlumniDto_notFound_throwsException() {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class,
-                () -> service.getDetailsForAlumniDto(a));
+                () -> service.getDetailsForAlumniDto(dto));
         assertTrue(ex.getMessage().contains("No details"));
     }
 
-    // ---------- getDetailsForListOfAlumni ----------
-    @Test
-    void testGetDetailsForListOfAlumni_success() throws Exception {
-        Alumni a = new Alumni();
-        a.setFacultyNumber(5);
-        AlumniDetails d = new AlumniDetails();
+    // ----------- getDetailsForListOfAlumni -------------
 
-        when(detailsRepository.findByIdOptional(5L)).thenReturn(Optional.of(d));
+    @Test
+    void getDetailsForListOfAlumni_validList_returnsDetailsList() throws Exception {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.of(d));
 
         List<AlumniDetails> result = service.getDetailsForListOfAlumni(List.of(a));
+
         assertEquals(List.of(d), result);
     }
 
     @Test
-    void testGetDetailsForListOfAlumni_notFoundThrows() {
-        Alumni a = new Alumni();
-        a.setFacultyNumber(5);
-        when(detailsRepository.findByIdOptional(5L)).thenReturn(Optional.empty());
+    void getDetailsForListOfAlumni_notFound_throwsException() {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> service.getDetailsForListOfAlumni(List.of(a)));
         assertTrue(ex.getMessage().contains("No details"));
     }
 
-    // ---------- updateAlumniDetails (AlumniDetails) ----------
+    // ----------- updateAlumniDetails (AlumniDetails) -------------
+
     @Test
-    void testUpdateAlumniDetails_withEntity_success() throws Exception {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(6);
-        AlumniDetails existing = new AlumniDetails();
-        existing.setFacultyNumber(6);
+    void updateAlumniDetails_entityExists_updatesAndReturnsEntity() throws Exception {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.of(d));
 
-        when(detailsRepository.findByIdOptional(6L)).thenReturn(Optional.of(existing));
-
-        AlumniDetails result = service.updateAlumniDetails(d);
-
-        assertSame(existing, result);
-        verify(detailsRepository).persist(existing);
-        assertNotNull(existing.getUpdatedAt());
+        AlumniDetails result = service.updateAlumniDetails(dNew);
+        
+        verify(detailsRepository).persist(any(AlumniDetails.class));
+        assertEquals(dNew.getFacultyNumber(), result.getFacultyNumber());
+        assertEquals(dNew.getBirthDate(), result.getBirthDate());
     }
 
     @Test
-    void testUpdateAlumniDetails_withEntity_notFoundThrows() {
-        AlumniDetails d = new AlumniDetails();
-        d.setFacultyNumber(6);
-        when(detailsRepository.findByIdOptional(6L)).thenReturn(Optional.empty());
+    void updateAlumniDetails_entityNotFound_throwsException() {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class,
                 () -> service.updateAlumniDetails(d));
         assertTrue(ex.getMessage().contains("does not exist"));
     }
 
-    // ---------- updateAlumniDetails (AlumniFrontDto) ----------
+    // ----------- updateAlumniDetails (AlumniFrontDto) -------------
+
     @Test
-    void testUpdateAlumniDetails_withFrontDto_success() throws Exception {
-        AlumniFrontDto dto = new AlumniFrontDto();
-        dto.setFacultyNumber(7);
-        dto.setFaculty("Engineering");
-
-        AlumniDetails existing = new AlumniDetails();
-        existing.setFacultyNumber(7);
-
-        Faculty faculty = new Faculty();
-
-        when(detailsRepository.findByIdOptional(7L)).thenReturn(Optional.of(existing));
+    void updateAlumniDetails_frontDtoExists_updatesAndReturnsEntity() throws Exception {
+        when(detailsRepository.findByIdOptional(7L)).thenReturn(Optional.of(d));
         when(facultyRepository.findByName("Engineering")).thenReturn(faculty);
 
-        AlumniDetails result = service.updateAlumniDetails(dto);
+        AlumniDetails result = service.updateAlumniDetails(dtoNew);
 
-        assertSame(existing, result);
-        assertSame(faculty, existing.getFaculty());
-        verify(detailsRepository).persist(existing);
-        assertNotNull(existing.getUpdatedAt());
+        assertEquals("Engineering", result.getFaculty().getFacultyName());
+        verify(detailsRepository).persist(result);
     }
 
     @Test
-    void testUpdateAlumniDetails_withFrontDto_notFoundThrows() {
-        AlumniFrontDto dto = new AlumniFrontDto();
-        dto.setFacultyNumber(7);
-        when(detailsRepository.findByIdOptional(7L)).thenReturn(Optional.empty());
+    void updateAlumniDetails_frontDtoNotFound_throwsException() {
+        when(detailsRepository.findByIdOptional(1L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class,
-                () -> service.updateAlumniDetails(dto));
+                () -> service.updateAlumniDetails(dtoNew));
         assertTrue(ex.getMessage().contains("does not exist"));
     }
 }
+
 

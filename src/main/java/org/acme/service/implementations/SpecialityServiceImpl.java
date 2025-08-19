@@ -1,15 +1,16 @@
 package org.acme.service.implementations;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.ambiguous.SpecialityDto;
 import org.acme.entites.Speciality;
 import org.acme.repository.SpecialityRepository;
 import org.acme.service.SpecialityService;
 import org.acme.util.mappers.SpecialityMapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class SpecialityServiceImpl implements SpecialityService {
@@ -48,7 +49,7 @@ public class SpecialityServiceImpl implements SpecialityService {
 
     @Override
     public List<SpecialityDto> getAllSpecialities() throws Exception {
-        List<Speciality> specialities = specialityRepository.findAll().list();
+        List<Speciality> specialities = specialityRepository.listAll();
         return convertToDtoList(specialities);
     }
 
@@ -89,4 +90,5 @@ public class SpecialityServiceImpl implements SpecialityService {
                 .map(s -> new SpecialityDto(s.getId(), s.getSpecialityName()))
                 .collect(Collectors.toList());
     }
+
 }

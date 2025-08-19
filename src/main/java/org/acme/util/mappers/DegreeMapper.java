@@ -6,10 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 @Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA)
-@ApplicationScoped
 public abstract class DegreeMapper {
     public abstract DegreeDto toDto(Degree entity);
 

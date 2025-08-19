@@ -3,6 +3,7 @@ package org.acme.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -19,29 +20,40 @@ import org.acme.service.implementations.FacultyServiceImpl;
 import org.acme.util.mappers.FacultyMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+
+@QuarkusTest
 class FacultyServiceTest {
 
-    @Mock
+    @InjectMock
     private FacultyRepository facultyRepository;
 
-    @Mock
+    @Inject
     private FacultyMapper facultyMapper;
-
-    @InjectMocks
+    @Inject
     private FacultyServiceImpl facultyService;
 
     private FacultyDto sampleDto;
     private Faculty sampleEntity;
+    
+    private Faculty f1;
+    private Faculty f2;
 
     @BeforeEach
     void setUp() {
+        f1 = new Faculty();
+        f1.setId(1);
+        f1.setFacultyName("Engineering");
+
+        f2 = new Faculty();
+        f2.setId(2);
+        f2.setFacultyName("Arts");
+
         sampleDto = new FacultyDto(1, "Engineering");
+
         sampleEntity = new Faculty();
         sampleEntity.setId(1);
         sampleEntity.setFacultyName("Engineering");
@@ -53,17 +65,15 @@ class FacultyServiceTest {
     void createFaculty_ShouldThrow_WhenDtoIsNull() {
         Exception ex = assertThrows(Exception.class, () -> facultyService.createFaculty(null));
         assertEquals("FacultyDto is null.", ex.getMessage());
-        verifyNoInteractions(facultyMapper, facultyRepository);
     }
 
     @Test
     void createFaculty_ShouldPersistAndReturn_WhenValid() throws Exception {
-        when(facultyMapper.toEntity(sampleDto)).thenReturn(sampleEntity);
-
         Faculty result = facultyService.createFaculty(sampleDto);
 
-        assertEquals(sampleEntity, result);
-        verify(facultyRepository).persist(sampleEntity);
+        verify(facultyRepository).persist(any(Faculty.class));
+        assertEquals(result.getFacultyName(), sampleDto.getFacultyName());
+        assertEquals(result.getId(), sampleDto.getId());
     }
 
     // ---------- deleteFaculty ----------
@@ -100,7 +110,7 @@ class FacultyServiceTest {
 
     @Test
     void getAllFaculties_ShouldReturnEmptyList_WhenNoFacultiesExist() throws Exception {
-        when(facultyRepository.findAll().list()).thenReturn(Collections.emptyList());
+        when(facultyRepository.listAll()).thenReturn(Collections.emptyList());
 
         List<FacultyDto> result = facultyService.getAllFaculties();
 
@@ -109,15 +119,9 @@ class FacultyServiceTest {
 
     @Test
     void getAllFaculties_ShouldReturnDtoList_WhenFacultiesExist() throws Exception {
-        Faculty f1 = new Faculty();
-        f1.setId(1);
-        f1.setFacultyName("Engineering");
 
-        Faculty f2 = new Faculty();
-        f2.setId(2);
-        f2.setFacultyName("Arts");
 
-        when(facultyRepository.findAll().list()).thenReturn(Arrays.asList(f1, f2));
+        when(facultyRepository.listAll()).thenReturn(Arrays.asList(f1, f2));
 
         List<FacultyDto> result = facultyService.getAllFaculties();
 

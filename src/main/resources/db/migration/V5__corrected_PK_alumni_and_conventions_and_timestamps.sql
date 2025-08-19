@@ -1,12 +1,17 @@
 -- Drop all dependent tables in the correct order due to foreign key constraints
-DROP TABLE IF EXISTS alumni_group_membership;
-DROP TABLE IF EXISTS company_records;
-DROP TABLE IF EXISTS alumni_details;
-DROP TABLE IF EXISTS alumni_groups;
-DROP TABLE IF EXISTS alumni;
-DROP TABLE IF EXISTS speciality;
-DROP TABLE IF EXISTS degree;
-DROP TABLE IF EXISTS faculty;
+DROP TABLE IF EXISTS alumni_group_membership CASCADE;
+DROP TABLE IF EXISTS alumni_group_memberships CASCADE;
+DROP TABLE IF EXISTS company_records CASCADE;
+DROP TABLE IF EXISTS alumni_details CASCADE;
+DROP TABLE IF EXISTS alumni_groups CASCADE;
+DROP TABLE IF EXISTS alumni CASCADE;
+DROP TABLE IF EXISTS alumnus CASCADE;
+DROP TABLE IF EXISTS speciality CASCADE;
+DROP TABLE IF EXISTS specialities CASCADE;
+DROP TABLE IF EXISTS degree CASCADE;
+DROP TABLE IF EXISTS degrees CASCADE;
+DROP TABLE IF EXISTS faculty CASCADE;
+DROP TABLE IF EXISTS faculties CASCADE;
 
 -- FACULTY
 CREATE TABLE faculties (

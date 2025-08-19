@@ -1,18 +1,20 @@
-package org.acme.service.implementations;
+package org.acme.service.group_service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.AlumniGroupsMembership;
 import org.acme.repository.AlumniGroupRepository;
 import org.acme.repository.AlumniGroupsMembershipRepository;
 import org.acme.repository.AlumniRepository;
-import org.acme.service.AlumniGroupMembershipService;
-import org.acme.util.mappers.AlumniGroupMembershipMapper;
-import org.acme.util.mappers.AlumniMapper;
+import org.acme.util.mappers.AlumniGroupCommonMapper;
 
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipService {
@@ -20,20 +22,17 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
     private final AlumniGroupsMembershipRepository membershipRepository;
     private final AlumniRepository alumniRepository;
     private final AlumniGroupRepository groupRepository;
-    private final AlumniGroupMembershipMapper groupMembershipMapper;
-    private final AlumniMapper alumniMapper;
-
+    private final AlumniGroupCommonMapper alumniGroupCommonMapper;
 
     @Inject
     public AlumniGroupMembershipServiceImpl(AlumniGroupsMembershipRepository membershipRepository,
                                             AlumniRepository alumniRepository, AlumniGroupRepository groupRepository,
-                                            AlumniGroupMembershipMapper groupMembershipMapper,
-                                            AlumniMapper alumniMapper) {
+                                            AlumniGroupCommonMapper alumniGroupCommonMapper) {
         this.membershipRepository = membershipRepository;
         this.alumniRepository = alumniRepository;
         this.groupRepository = groupRepository;
-        this.groupMembershipMapper = groupMembershipMapper;
-        this.alumniMapper = alumniMapper;
+        this.alumniGroupCommonMapper = alumniGroupCommonMapper;
+        
     }
 
     @Override
@@ -42,7 +41,7 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
             throw new Exception("Membership DTO is null.");
         }
 
-        AlumniGroupsMembership membership = groupMembershipMapper.toEntityFront(dto);
+        AlumniGroupsMembership membership = alumniGroupCommonMapper.toEntityFront(dto);
 
         membership.setGroup(groupRepository
                 .findByIdOptional((long) dto.getGroupNumber())
@@ -101,21 +100,18 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
 
     @Override
     public List<AlumniGroupMembershipDto> getAllAlumniGroupMembershipsByFacultyNumber(int facultyNumber) throws Exception {
-        List<AlumniGroupsMembership> memberships =
-                membershipRepository.findAllByFacultyNumber(facultyNumber);
-        return groupMembershipMapper.toBackDtos(memberships);
+        return enrichDto(membershipRepository.findAllByFacultyNumber(facultyNumber));
     }
 
     @Override
     public List<AlumniGroupMembershipDto> getAllAlumniGroupMembershipsByGroup(int groupId) throws Exception {
-        List<AlumniGroupsMembership> memberships = membershipRepository.findAllByGroupId(groupId);
-        return groupMembershipMapper.toBackDtos(memberships);
+        return enrichDto(membershipRepository.findAllByGroupId(groupId));
     }
 
     @Override
     public List<AlumniGroupMembershipDto> getAllAlumniGroupMembershipsDto() throws Exception {
-        List<AlumniGroupsMembership> memberships = membershipRepository.findAll().list();
-        return groupMembershipMapper.toBackDtos(memberships);
+        List<AlumniGroupsMembership> memberships = membershipRepository.listAll();
+        return alumniGroupCommonMapper.toBackDtos(memberships);
     }
 
     @Override
@@ -129,12 +125,6 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
             throw new Exception("Membership not found.");
         }
         return membership;
-    }
-
-    @Override
-    public AlumniGroupsMembership getAlumniGroupsMembershipByName(String name) throws Exception {
-        // If you don't have a name field, this method may not be needed
-        throw new UnsupportedOperationException("Not implemented.");
     }
 
     @Override
@@ -182,5 +172,29 @@ public class AlumniGroupMembershipServiceImpl implements AlumniGroupMembershipSe
         membershipRepository.persist(existing);
         return existing;
     }
+
+    public List<AlumniGroupMembershipDto> enrichDto(List<AlumniGroupsMembership> list) {
+        List<AlumniGroupMembershipDto> dList = alumniGroupCommonMapper.toBackDtos(list);
+        int[] i = { 0 };
+
+        list.stream().forEach(m -> {
+            AlumniGroupBackDto groupDto = alumniGroupCommonMapper.toAlumniGroupDto(m.getGroup());
+
+            groupDto.setMembershipIds(
+                m.getGroup().getMemberships() == null
+                    ? Collections.emptyList()
+                    : m.getGroup().getMemberships().stream()
+                        .map(AlumniGroupsMembership::getId)
+                        .collect(Collectors.toList())
+            );
+
+            dList.get(i[0]++).setGroup(groupDto);
+        });
+
+        return dList;
+    }
+
+
+    
 }
 

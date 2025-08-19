@@ -7,10 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 @Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA)
-@ApplicationScoped
 public abstract class DateMappingUtils {
 
     @Named(value = "mapTimestampToInstant")

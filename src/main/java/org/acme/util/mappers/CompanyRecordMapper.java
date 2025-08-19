@@ -7,7 +7,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
@@ -15,7 +14,6 @@ import jakarta.inject.Inject;
         DateMappingUtils.class,
 
 })
-@ApplicationScoped
 public abstract class CompanyRecordMapper {
 
     private AlumniMapper alumniMapper;

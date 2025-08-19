@@ -3,6 +3,7 @@ package org.acme.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -20,21 +21,20 @@ import org.acme.service.implementations.DegreeServiceImpl;
 import org.acme.util.mappers.DegreeMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+
+@QuarkusTest
 class DegreeServiceTest {
 
-    @Mock
+    @InjectMock
     private DegreeRepository degreeRepository;
 
-    @Mock
+    @Inject
     private DegreeMapper degreeMapper;
-
-    @InjectMocks
+    @Inject
     private DegreeServiceImpl degreeService;
 
     private Degree degree;
@@ -52,12 +52,11 @@ class DegreeServiceTest {
     // --- createDegree ---
     @Test
     void createDegree_validInput_persistsAndReturnsEntity() throws Exception {
-        when(degreeMapper.toEntity(degreeDto)).thenReturn(degree);
-
         Degree result = degreeService.createDegree(degreeDto);
 
-        verify(degreeRepository).persist(degree);
-        assertEquals(degree, result);
+        verify(degreeRepository).persist(any(Degree.class));
+        assertEquals(result.getDegreeName(), degree.getDegreeName());
+        assertEquals(result.getId(), degree.getId());
     }
 
     // --- deleteDegree ---
@@ -77,7 +76,7 @@ class DegreeServiceTest {
     // --- getAllDegrees ---
     @Test
     void getAllDegrees_emptyList_returnsEmptyList() throws Exception {
-        when(degreeRepository.findAll().list()).thenReturn(Collections.emptyList());
+        when(degreeRepository.listAll()).thenReturn(Collections.emptyList());
 
         List<DegreeDto> result = degreeService.getAllDegrees();
 
@@ -86,7 +85,7 @@ class DegreeServiceTest {
 
     @Test
     void getAllDegrees_nonEmptyList_returnsMappedList() throws Exception {
-        when(degreeRepository.findAll().list()).thenReturn(Arrays.asList(degree));
+        when(degreeRepository.listAll()).thenReturn(Arrays.asList(degree));
 
         List<DegreeDto> result = degreeService.getAllDegrees();
 
@@ -156,8 +155,8 @@ class DegreeServiceTest {
 
         Degree result = degreeService.updateDegree(degreeDto);
 
+        verify(degreeRepository).persist(any(Degree.class));
         assertEquals("Computer Science", result.getDegreeName());
-        verify(degreeRepository).persist(degree);
     }
 
     // --- convertToDtoList ---

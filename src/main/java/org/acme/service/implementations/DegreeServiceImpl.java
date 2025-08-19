@@ -1,15 +1,16 @@
 package org.acme.service.implementations;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.ambiguous.DegreeDto;
 import org.acme.entites.Degree;
 import org.acme.repository.DegreeRepository;
 import org.acme.service.DegreeService;
 import org.acme.util.mappers.DegreeMapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class DegreeServiceImpl implements DegreeService {
@@ -40,7 +41,7 @@ public class DegreeServiceImpl implements DegreeService {
 
     @Override
     public List<DegreeDto> getAllDegrees() throws Exception {
-        return convertToDtoList(degreeRepository.findAll().list());
+        return convertToDtoList(degreeRepository.listAll());
     }
 
     @Override
@@ -85,5 +86,15 @@ public class DegreeServiceImpl implements DegreeService {
                         m -> new DegreeDto(m.getId(), m.getDegreeName()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((degreeRepository == null) ? 0 : degreeRepository.hashCode());
+        result = prime * result + ((degreeMapper == null) ? 0 : degreeMapper.hashCode());
+        return result;
+    }
+
 
 }

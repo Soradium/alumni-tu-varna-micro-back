@@ -1,7 +1,11 @@
 package org.acme.service.implementations;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
@@ -12,11 +16,8 @@ import org.acme.repository.FacultyRepository;
 import org.acme.service.AlumniDetailsService;
 import org.acme.util.mappers.AlumniMapper;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AlumniDetailsServiceImpl implements AlumniDetailsService {
@@ -37,7 +38,7 @@ public class AlumniDetailsServiceImpl implements AlumniDetailsService {
 
     @Override
     public List<AlumniDetails> getAllAlumniDetails() throws Exception {
-        return detailsRepository.findAll().list();
+        return detailsRepository.listAll();
     }
 
     @Override
@@ -159,5 +160,6 @@ public class AlumniDetailsServiceImpl implements AlumniDetailsService {
         detailsRepository.persist(existing);
         return existing;
     }
+
 
 }

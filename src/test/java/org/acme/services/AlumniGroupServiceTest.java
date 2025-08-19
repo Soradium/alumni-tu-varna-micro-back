@@ -3,6 +3,8 @@ package org.acme.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,40 +17,41 @@ import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.avro.ambiguous.SpecialityDto;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
-import org.acme.entites.Faculty;
-import org.acme.entites.Speciality;
+import org.acme.entites.AlumniGroupsMembership;
 import org.acme.repository.AlumniGroupRepository;
-import org.acme.service.implementations.AlumniGroupServiceImpl;
+import org.acme.service.group_service.AlumniGroupServiceImpl;
 import org.acme.util.mappers.AlumniGroupMapper;
 import org.acme.util.mappers.FacultyMapper;
 import org.acme.util.mappers.SpecialityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+
+@QuarkusTest
 class AlumniGroupServiceTest {
 
-    @Mock
+    @InjectMock
     private AlumniGroupRepository groupRepository;
 
-    @Mock
+    @Inject
     private AlumniGroupMapper groupMapper;
 
-    @Mock
+    @Inject
     private FacultyMapper facultyMapper;
 
-    @Mock
+    @Inject
     private SpecialityMapper specialityMapper;
 
-    @InjectMocks
+    @Inject
     private AlumniGroupServiceImpl service;
 
     private AlumniGroup group;
     private AlumniGroupDtoSimplified dto;
+    private AlumniGroupsMembership membership;
 
     @BeforeEach
     void setUp() {
@@ -61,17 +64,22 @@ class AlumniGroupServiceTest {
         dto.setGroupNumber(101);
         dto.setFaculty(new FacultyDto());
         dto.setSpeciality(new SpecialityDto());
+
+        membership = new AlumniGroupsMembership();
+        membership.setId(1);
+        membership.setGroup(group);
+
+        group.setMemberships(List.of(membership));
     }
 
     // -------- createAlumniGroup(dto) --------
     @Test
     void createAlumniGroup_fromDto_success() throws Exception {
-        when(groupMapper.toEntitySimplified(dto)).thenReturn(group);
 
         AlumniGroup result = service.createAlumniGroup(dto);
 
-        assertEquals(group, result);
-        verify(groupRepository).persist(group);
+        verify(groupRepository).persist(any(AlumniGroup.class));
+        assertEquals(group.getId(), result.getId());
     }
 
     @Test
@@ -132,8 +140,11 @@ class AlumniGroupServiceTest {
     // -------- getAllAlumniGroupsDtoByFaculty --------
     @Test
     void getAllByFaculty_emptyList_returnsEmpty() throws Exception {
-        when(groupRepository.find("faculty.facultyName", "Science").list()).thenReturn(Collections.emptyList());
-        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
+        PanacheQuery<AlumniGroup> query = mock(PanacheQuery.class);
+
+        when(groupRepository.find("faculty.facultyName", "Science")).thenReturn(query);
+        when(query.list()).thenReturn(Collections.emptyList());
+        
 
         List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoByFaculty("Science");
         assertTrue(result.isEmpty());
@@ -147,8 +158,10 @@ class AlumniGroupServiceTest {
     // -------- getAllAlumniGroupsDtoByGraduationYear --------
     @Test
     void getAllByGraduationYear_noResults_returnsEmpty() throws Exception {
-        when(groupRepository.find("graduationYear", 2020).list()).thenReturn(Collections.emptyList());
-        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
+        PanacheQuery<AlumniGroup> query = mock(PanacheQuery.class);
+
+        when(groupRepository.find("graduationYear", 2020)).thenReturn(query);
+        when(query.list()).thenReturn(Collections.emptyList());
 
         List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoByGraduationYear(2020);
         assertTrue(result.isEmpty());
@@ -157,9 +170,11 @@ class AlumniGroupServiceTest {
     // -------- getAllAlumniGroupsDtoBySpeciality --------
     @Test
     void getAllBySpeciality_noResults_returnsEmpty() throws Exception {
-        when(groupRepository.find("speciality.specialityName", "Math").list()).thenReturn(Collections.emptyList());
-        when(groupMapper.toDtoList(Collections.emptyList())).thenReturn(Collections.emptyList());
+        PanacheQuery<AlumniGroup> query = mock(PanacheQuery.class);
 
+        when(groupRepository.find("speciality.specialityName", "Math")).thenReturn(query);
+        when(query.list()).thenReturn(Collections.emptyList());
+        
         List<AlumniGroupBackDto> result = service.getAllAlumniGroupsDtoBySpeciality("Math");
         assertTrue(result.isEmpty());
     }
@@ -182,8 +197,6 @@ class AlumniGroupServiceTest {
     @Test
     void updateFromDto_success() throws Exception {
         when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
-        when(facultyMapper.toEntity(dto.getFaculty())).thenReturn(new Faculty());
-        when(specialityMapper.toEntity(dto.getSpeciality())).thenReturn(new Speciality());
 
         AlumniGroup updated = service.updateAlumniGroup(dto);
 
@@ -218,10 +231,11 @@ class AlumniGroupServiceTest {
     @Test
     void getDtoById_found_returnsDto() throws Exception {
         AlumniGroupBackDto dtoBack = new AlumniGroupBackDto();
+        dtoBack.setId(1);
         when(groupRepository.findByIdOptional(1L)).thenReturn(Optional.of(group));
 
         AlumniGroupBackDto result = service.getAlumniGroupDtoById(1);
-        assertEquals(dtoBack, result);
+        assertEquals(dtoBack.getId(), result.getId());
     }
 
     @Test

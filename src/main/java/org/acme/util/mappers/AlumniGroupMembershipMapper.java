@@ -10,21 +10,13 @@ import org.acme.entites.Alumni;
 import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
-
-import jakarta.enterprise.context.ApplicationScoped;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
 }
 )
-@ApplicationScoped
 public abstract class AlumniGroupMembershipMapper {
-
-    @Mapping(target = "facultyNumber", source = "alumni.facultyNumber")
-    @Mapping(target = "groupBuilder", ignore = true)
-    public abstract AlumniGroupMembershipDto toBackDto(AlumniGroupsMembership entity);
 
     @Named("toEntityFromDtoAlumniGroupMembershipList")
     public List<AlumniGroupsMembership> toEntityList(
@@ -36,8 +28,9 @@ public abstract class AlumniGroupMembershipMapper {
 
             Alumni alumni = new Alumni();
             alumni.setFacultyNumber(m.getFacultyNumber());
-            agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
-
+            agm.setAlumni(alumni); 
+            // will probably need enrichment or wiring, only faculty number added
+            // they do not have group also
             agm.setAverageScore(m.getAverageScore());
 
             return agm;
@@ -55,7 +48,9 @@ public abstract class AlumniGroupMembershipMapper {
 
             Alumni alumni = new Alumni();
             alumni.setFacultyNumber(m.getFacultyNumber());
-            agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+            agm.setAlumni(alumni); 
+            // will probably need enrichment or wiring, only faculty number added
+            // does not have real group also
 
             agm.setAverageScore(m.getAverageScore());
             AlumniGroup group = new AlumniGroup();
@@ -75,14 +70,14 @@ public abstract class AlumniGroupMembershipMapper {
 
         Alumni alumni = new Alumni();
         alumni.setFacultyNumber(dto.getFacultyNumber());
-        agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+        agm.setAlumni(alumni); 
+        // will probably need enrichment or wiring, only faculty number added
 
         agm.setAverageScore(dto.getAverageScore());
 
         return agm;
 
     }
-
 
     @Named("toEntityFromDtoAlumniGroupMembershipFrontSingle")
     public AlumniGroupsMembership toEntityFront(
@@ -92,10 +87,13 @@ public abstract class AlumniGroupMembershipMapper {
 
         Alumni alumni = new Alumni();
         alumni.setFacultyNumber(dto.getFacultyNumber());
-        agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+        agm.setAlumni(alumni); 
+        // will probably need enrichment or wiring, only faculty number added
 
         agm.setAverageScore(dto.getAverageScore());
         AlumniGroup group = new AlumniGroup();
+        // will need group enrichment
+
         group.setId(dto.getGroupNumber());
         agm.setGroup(group);
         return agm;
@@ -106,13 +104,14 @@ public abstract class AlumniGroupMembershipMapper {
     public List<AlumniGroupMembershipDto> toBackDtos(List<AlumniGroupsMembership> memberships) {
         return memberships.stream().map(m -> {
             AlumniGroupMembershipDto dto = new AlumniGroupMembershipDto();
+            // will need group enrichment
             dto.setAverageScore(m.getAverageScore());
             dto.setFacultyNumber(m.getAlumni().getFacultyNumber());
             dto.setId(m.getId());
+            
             return dto;
         }).collect(Collectors.toList());
     }
-
 
     @Named("extractMembershipIds")
     public List<Integer> extractMembershipIds(List<AlumniGroupsMembership> memberships) {
@@ -132,5 +131,18 @@ public abstract class AlumniGroupMembershipMapper {
                 : new ArrayList<>();
     }
 
+     @Named("extractMembershipId")
+    public Integer extractMembershipId(AlumniGroupsMembership membership) {
+        return membership != null ? membership.getId() : null;
+    }
+
+    @Named("toBasicEntitySingle")
+    public AlumniGroupsMembership toBasicEntitySingle(Integer membershipId) {
+        if (membershipId == null) return null;
+        AlumniGroupsMembership agm = new AlumniGroupsMembership();
+        agm.setId(membershipId);
+        return agm;
+    }
+    
 
 }
