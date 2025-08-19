@@ -1,3 +1,5 @@
+## A basic GitHub Actions workflow for your Quarkus application.
+
 name: CI build
 
 on:
@@ -12,12 +14,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the repository
       - uses: actions/checkout@v4
 
-      # Set up Java 21 with Maven cache and GitHub Packages auth
       - name: Set up Java and Maven auth for GitHub Packages
         uses: actions/setup-java@v4
         with:
@@ -25,9 +24,23 @@ jobs:
           distribution: temurin
           cache: maven
           server-id: github
-          server-username: OleksPorokhnia
-          server-password: ${{ secrets.GH_PACKAGES_TOKEN }}
+          settings-path: ${{ github.workspace }}
+          token: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      # Verify Maven can fetch dependencies and build the project
-      - name: Build with Maven
-        run: ./mvnw clean verify -B
+      - name: Set up Maven settings.xml for GitHub Packages
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>OleksPorokhnia</username>
+                <password>${{ secrets.GH_PACKAGES_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Build
+        run: ./mvnw verify -B

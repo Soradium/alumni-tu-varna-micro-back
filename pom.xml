@@ -17,6 +17,15 @@
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id> 
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/OleksPorokhnia/alumni-avro-schemas</url>
+        </repository>
+    </distributionManagement>
+
+
     <dependencyManagement>
         <dependencies>
             <dependency>
