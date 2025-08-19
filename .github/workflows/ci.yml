@@ -1,4 +1,4 @@
-## CI build workflow for Quarkus with Docker Compose
+## CI build workflow for Quarkus with Docker Compose (services first, build with your Maven setup)
 
 name: CI build
 
@@ -19,6 +19,37 @@ jobs:
       # Checkout code
       - uses: actions/checkout@v4
 
+      # Start Postgres first
+      - name: Start Postgres
+        run: docker compose -f ./docker/docker-compose.yml up -d db
+
+      # Wait for Postgres to be ready (5 seconds)
+      - name: Wait for Postgres
+        run: |
+          echo "Waiting 5 seconds for Postgres..."
+          sleep 5
+
+      # Start Kafka
+      - name: Start Kafka
+        run: docker compose -f ./docker/docker-compose.yml up -d kafkaservice
+
+      # Wait for Kafka to be ready (15 seconds)
+      - name: Wait for Kafka
+        run: |
+          echo "Waiting 15 seconds for Kafka..."
+          sleep 15
+
+      # Start the app container
+      - name: Start App container
+        run: docker compose -f ./docker/docker-compose.yml up -d app
+
+      # Wait a few seconds for the app to initialize
+      - name: Wait for App
+        run: |
+          echo "Waiting 5 seconds for App to initialize..."
+          sleep 5
+
+      # --- YOUR ORIGINAL JAVA + MAVEN LOGIC ---
       # Set up Java and Maven auth for GitHub Packages
       - name: Set up Java and Maven auth for GitHub Packages
         uses: actions/setup-java@v4
@@ -46,26 +77,6 @@ jobs:
           </settings>
           EOF
 
-      # Build the project
-      - name: Build Quarkus project
-        run: ./mvnw verify -B
-
-      # Start Docker Compose services in detached mode
-      - name: Start Docker Compose services
-        run: docker compose -f ./docker/docker-compose.yml up -d
-
-      # Wait for Postgres to be ready (5 seconds)
-      - name: Wait for Postgres
-        run: |
-          echo "Waiting 5 seconds for Postgres..."
-          sleep 5
-
-      # Wait for Kafka to be ready (15 seconds)
-      - name: Wait for Kafka
-        run: |
-          echo "Waiting 15 seconds for Kafka..."
-          sleep 15
-
-      # Run tests inside the app container
-      - name: Run integration tests
+      # Build Quarkus project (integration tests run inside the app container)
+      - name: Build Quarkus project inside container
         run: docker compose exec app ./mvnw verify -B
