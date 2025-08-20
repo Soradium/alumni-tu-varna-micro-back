@@ -1,15 +1,16 @@
 package org.acme.service.implementations;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.ambiguous.FacultyDto;
 import org.acme.entites.Faculty;
 import org.acme.repository.FacultyRepository;
 import org.acme.service.FacultyService;
 import org.acme.util.mappers.FacultyMapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class FacultyServiceImpl implements FacultyService {
@@ -46,7 +47,7 @@ public class FacultyServiceImpl implements FacultyService {
 
     @Override
     public List<FacultyDto> getAllFaculties() throws Exception {
-        List<Faculty> faculties = facultyRepository.findAll().list();
+        List<Faculty> faculties = facultyRepository.listAll();
         return convertToDtoList(faculties);
     }
 
@@ -87,4 +88,5 @@ public class FacultyServiceImpl implements FacultyService {
                 .map(f -> new FacultyDto(f.getId(), f.getFacultyName()))
                 .collect(Collectors.toList());
     }
+    
 }

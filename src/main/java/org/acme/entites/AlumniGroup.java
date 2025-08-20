@@ -1,18 +1,27 @@
 package org.acme.entites;
 
+import java.util.List;
+
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.ArrayList;
 
 @Entity
 @Table(name = "alumni_groups")
 public class AlumniGroup extends PanacheEntityBase {
 
     @OneToMany(mappedBy = "group")
-    public ArrayList<AlumniGroupsMembership> memberships;
+    public List<AlumniGroupsMembership> memberships;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "groups_id")
@@ -77,11 +86,11 @@ public class AlumniGroup extends PanacheEntityBase {
         this.speciality = speciality;
     }
 
-    public ArrayList<AlumniGroupsMembership> getMemberships() {
+    public List<AlumniGroupsMembership> getMemberships() {
         return memberships;
     }
 
-    public void setMemberships(ArrayList<AlumniGroupsMembership> memberships) {
+    public void setMemberships(List<AlumniGroupsMembership> memberships) {
         this.memberships = memberships;
     }
 

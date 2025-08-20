@@ -1,13 +1,12 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.acme.avro.back.AlumniDto;
 import org.acme.entites.Alumni;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = "cdi")
-@ApplicationScoped
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA)
 public abstract class SimpleAlumniMapper {
 
     @Mapping(target = "birthDate", ignore = true)

@@ -1,10 +1,10 @@
-package org.acme.service;
+package org.acme.service.group_service;
+
+import java.util.List;
 
 import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
-
-import java.util.List;
 
 public interface AlumniGroupService {
 

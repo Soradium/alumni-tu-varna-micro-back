@@ -1,19 +1,26 @@
 package org.acme.entites;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.*;
+import java.util.List;
 
-import java.util.ArrayList;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "alumni")
 public class Alumni extends PanacheEntityBase {
 
-    @OneToMany(mappedBy = "alumni")
-    public ArrayList<AlumniGroupsMembership> memberships;
     @Id
     @Column(name = "faculty_number")
     private Integer facultyNumber;
+    @OneToMany(mappedBy = "alumni")
+    public List<AlumniGroupsMembership> memberships;
     @Column(name = "facebook_url")
     private String facebookUrl;
     @Column(name = "linkedin_url")
@@ -25,11 +32,11 @@ public class Alumni extends PanacheEntityBase {
     public Alumni() {
     }
 
-    public ArrayList<AlumniGroupsMembership> getMemberships() {
+    public List<AlumniGroupsMembership> getMemberships() {
         return memberships;
     }
 
-    public void setMemberships(ArrayList<AlumniGroupsMembership> memberships) {
+    public void setMemberships(List<AlumniGroupsMembership> memberships) {
         this.memberships = memberships;
     }
 

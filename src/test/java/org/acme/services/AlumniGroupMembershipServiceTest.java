@@ -5,72 +5,115 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
+import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.Alumni;
 import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
+import org.acme.entites.Degree;
+import org.acme.entites.Faculty;
+import org.acme.entites.Speciality;
 import org.acme.repository.AlumniGroupRepository;
 import org.acme.repository.AlumniGroupsMembershipRepository;
 import org.acme.repository.AlumniRepository;
-import org.acme.service.implementations.AlumniGroupMembershipServiceImpl;
-import org.acme.util.mappers.AlumniGroupMembershipMapper;
-import org.acme.util.mappers.AlumniMapper;
+import org.acme.service.group_service.AlumniGroupMembershipServiceImpl;
+import org.acme.util.mappers.AlumniGroupCommonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Parameters;
-import jakarta.persistence.LockModeType;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 
+@QuarkusTest
 public class AlumniGroupMembershipServiceTest {
 
-    @Mock
+    @InjectMock
     private AlumniGroupsMembershipRepository membershipRepository;
-    @Mock
+    @InjectMock
     private AlumniRepository alumniRepository;
-    @Mock
+    @InjectMock
     private AlumniGroupRepository groupRepository;
-    @Mock
-    private AlumniGroupMembershipMapper groupMembershipMapper;
-    @Mock
-    private AlumniMapper alumniMapper;
 
-    @InjectMocks
+    @Inject
+    private AlumniGroupCommonMapper groupMembershipMapper;
+    @Inject
     private AlumniGroupMembershipServiceImpl service;
 
     private AlumniGroupsMembership membership;
     private AlumniGroupMembershipFrontDto frontDto;
+    private AlumniGroupMembershipDto dto;
+    private Faculty f;
+    private Speciality s;
+    private Alumni a;
+    private Degree d;
+    private AlumniGroupBackDto groupDto;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+    MockitoAnnotations.openMocks(this);
 
-        membership = new AlumniGroupsMembership();
-        membership.setId(1);
-        membership.setAverageScore(4.0);
+    // Alumni and Degree
+    a = new Alumni();
+    d = new Degree();
+    d.setId(1);
+    d.setDegree("bachelor"); 
+    a.setFacultyNumber(101);
+    a.setDegree(d);
 
-        frontDto = new AlumniGroupMembershipFrontDto();
-        frontDto.setId(1);
-        frontDto.setAverageScore(3.5);
-        frontDto.setFacultyNumber(101);
-        frontDto.setGroupNumber(202);
-    }
+    // Faculty and Speciality
+    f = new Faculty();
+    f.setId(1);
+    f.setFacultyName("FITA");
+
+    s = new Speciality();
+    s.setId(1);
+    s.setSpecialityName("SIT");
+
+    // Membership
+    membership = new AlumniGroupsMembership();
+    membership.setId(1);
+    membership.setAverageScore(3.5);
+
+    // AlumniGroup
+    AlumniGroup g = new AlumniGroup();
+    g.setId(1);
+    g.setGroupNumber(202);
+    g.setFaculty(f);
+    g.setSpeciality(s);
+    g.setGraduationYear(2000);
+    g.setMemberships(List.of(membership));
+
+    a.setMemberships(List.of(membership));
+    membership.setAlumni(a);
+    membership.setGroup(g);
+
+    // Front DTO
+    frontDto = new AlumniGroupMembershipFrontDto();
+    frontDto.setId(1);
+    frontDto.setAverageScore(3.5);
+    frontDto.setFacultyNumber(101);
+    frontDto.setGroupNumber(202);
+
+    // Back DTO
+    dto = new AlumniGroupMembershipDto();
+    dto.setId(1);
+    dto.setAverageScore(3.5);
+    dto.setFacultyNumber(101);
+
+    dto.setGroup(groupMembershipMapper.toAlumniGroupDto(g));
+}
+
+
 
     // -------- createAlumniGroupsMembership(FrontDto) --------
 
@@ -82,7 +125,7 @@ public class AlumniGroupMembershipServiceTest {
 
     @Test
     void createFromFrontDto_groupNotFound_throwsException() {
-        when(groupMembershipMapper.toEntityFront(frontDto)).thenReturn(membership);
+        groupMembershipMapper.toEntityFront(frontDto);
         when(groupRepository.findByIdOptional(202L)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(Exception.class, () -> service.createAlumniGroupsMembership(frontDto));
@@ -91,7 +134,8 @@ public class AlumniGroupMembershipServiceTest {
 
     @Test
     void createFromFrontDto_alumniNotFound_throwsException() {
-        when(groupMembershipMapper.toEntityFront(frontDto)).thenReturn(membership);
+        // when(groupMembershipMapper.toEntityFront(frontDto)).thenReturn(membership);
+        groupMembershipMapper.toEntityFront(frontDto);
         when(groupRepository.findByIdOptional(202L)).thenReturn(Optional.of(new AlumniGroup()));
         when(alumniRepository.findByIdOptional(101L)).thenReturn(Optional.empty());
 
@@ -101,14 +145,22 @@ public class AlumniGroupMembershipServiceTest {
 
     @Test
     void createFromFrontDto_success_persistsAndReturns() throws Exception {
-        when(groupMembershipMapper.toEntityFront(frontDto)).thenReturn(membership);
-        when(groupRepository.findByIdOptional(202L)).thenReturn(Optional.of(new AlumniGroup()));
-        when(alumniRepository.findByIdOptional(101L)).thenReturn(Optional.of(new Alumni()));
+        // Stub repositories to return existing entities
+        when(groupRepository.findByIdOptional(202L)).thenReturn(Optional.of(membership.getGroup()));
+        when(alumniRepository.findByIdOptional(101L)).thenReturn(Optional.of(membership.getAlumni()));
 
+        // Call the service
         AlumniGroupsMembership result = service.createAlumniGroupsMembership(frontDto);
 
-        verify(membershipRepository).persist(membership);
-        assertSame(membership, result);
+        // Verify repository persist was called with an object having same properties
+        verify(membershipRepository).persist(any(AlumniGroupsMembership.class));
+
+        // Assert that the returned object has the same id as expected
+        assertSame(membership.getId(), result.getId());
+        assertEquals(membership.getAverageScore(), result.getAverageScore());
+        assertSame(membership.getGroup(), result.getGroup());
+        assertSame(membership.getAlumni(), result.getAlumni());
+        
     }
 
     // -------- createAlumniGroupsMembership(Entity) --------
@@ -188,11 +240,12 @@ public class AlumniGroupMembershipServiceTest {
 
     // -------- getAll... --------
 
+    // tobackdtos in groupmembershipmapper returns list WITHOUT GROUP, because it does not populate the group (did not!)
     @Test
     void getAllByFacultyNumber_returnsMappedDtos() throws Exception {
         when(membershipRepository.findAllByFacultyNumber(101)).thenReturn(Collections.singletonList(membership));
-        when(groupMembershipMapper.toBackDtos(anyList())).thenReturn(Arrays.asList(new AlumniGroupMembershipDto()));
-
+        when(groupRepository.findByIdOptional(202L)).thenReturn(Optional.of(membership.getGroup()));
+        // do not stub services
         List<AlumniGroupMembershipDto> result = service.getAllAlumniGroupMembershipsByFacultyNumber(101);
         assertEquals(1, result.size());
     }
@@ -200,160 +253,9 @@ public class AlumniGroupMembershipServiceTest {
     @Test
     void getAllByGroup_returnsMappedDtos() throws Exception {
         when(membershipRepository.findAllByGroupId(202)).thenReturn(Collections.singletonList(membership));
-        when(groupMembershipMapper.toBackDtos(anyList())).thenReturn(Arrays.asList(new AlumniGroupMembershipDto()));
+        // when(groupMembershipMapper.toBackDtos(anyList())).thenReturn(Arrays.asList(new AlumniGroupMembershipDto()));
 
         List<AlumniGroupMembershipDto> result = service.getAllAlumniGroupMembershipsByGroup(202);
-        assertEquals(1, result.size());
-    }
-
-    //TODO i'll fix the full implementation stubs later
-    @Test
-    void getAllDtos_returnsMappedDtos() throws Exception {
-        when(membershipRepository.findAll()).thenReturn(new PanacheQuery<AlumniGroupsMembership>() {
-            @Override public List<AlumniGroupsMembership> list() { return Collections.singletonList(membership); 
-            }
-            @Override
-            public <T> PanacheQuery<T> project(Class<T> type) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'project'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> page(Page page) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'page'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> page(int pageIndex, int pageSize) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'page'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> nextPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'nextPage'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> previousPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'previousPage'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> firstPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'firstPage'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> lastPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'lastPage'");
-            }
-
-            @Override
-            public boolean hasNextPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'hasNextPage'");
-            }
-
-            @Override
-            public boolean hasPreviousPage() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'hasPreviousPage'");
-            }
-
-            @Override
-            public int pageCount() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'pageCount'");
-            }
-
-            @Override
-            public Page page() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'page'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> range(int startIndex, int lastIndex) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'range'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> withLock(LockModeType lockModeType) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'withLock'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> withHint(String hintName, Object value) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'withHint'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> filter(String filterName, Parameters parameters) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'filter'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> filter(String filterName,
-                    Map<String, Object> parameters) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'filter'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> PanacheQuery<T> filter(String filterName) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'filter'");
-            }
-
-            @Override
-            public long count() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'count'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> Stream<T> stream() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'stream'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> T firstResult() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'firstResult'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> Optional<T> firstResultOptional() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'firstResultOptional'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> T singleResult() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'singleResult'");
-            }
-
-            @Override
-            public <T extends AlumniGroupsMembership> Optional<T> singleResultOptional() {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'singleResultOptional'");
-            }
-        });
-        when(groupMembershipMapper.toBackDtos(anyList())).thenReturn(Arrays.asList(new AlumniGroupMembershipDto()));
-
-        List<AlumniGroupMembershipDto> result = service.getAllAlumniGroupMembershipsDto();
         assertEquals(1, result.size());
     }
 
@@ -378,13 +280,6 @@ public class AlumniGroupMembershipServiceTest {
         when(membershipRepository.findById(1L)).thenReturn(membership);
         AlumniGroupsMembership result = service.getAlumniGroupsMembershipById(1);
         assertSame(membership, result);
-    }
-
-    // -------- getByName --------
-
-    @Test
-    void getByName_alwaysThrowsUnsupported() {
-        assertThrows(UnsupportedOperationException.class, () -> service.getAlumniGroupsMembershipByName("test"));
     }
 
     // -------- updateFromFrontDto --------

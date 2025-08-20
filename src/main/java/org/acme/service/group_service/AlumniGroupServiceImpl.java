@@ -1,33 +1,36 @@
-package org.acme.service.implementations;
+package org.acme.service.group_service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.List;
+
 import org.acme.avro.ambiguous.AlumniGroupDtoSimplified;
 import org.acme.avro.back.AlumniGroupBackDto;
 import org.acme.entites.AlumniGroup;
 import org.acme.repository.AlumniGroupRepository;
-import org.acme.service.AlumniGroupService;
+import org.acme.util.mappers.AlumniGroupCommonMapper;
 import org.acme.util.mappers.AlumniGroupMapper;
 import org.acme.util.mappers.FacultyMapper;
 import org.acme.util.mappers.SpecialityMapper;
 
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class AlumniGroupServiceImpl implements AlumniGroupService {
 
     private final AlumniGroupRepository groupRepository;
-    private final AlumniGroupMapper groupMapper;
     private final FacultyMapper facultyMapper;
     private final SpecialityMapper specialityMapper;
+    private final AlumniGroupCommonMapper alumniGroupCommonMapper;
 
+    
     @Inject
     public AlumniGroupServiceImpl(AlumniGroupRepository groupRepository, AlumniGroupMapper groupMapper,
-                                  FacultyMapper facultyMapper, SpecialityMapper specialityMapper) {
+            FacultyMapper facultyMapper, SpecialityMapper specialityMapper,
+            AlumniGroupCommonMapper alumniGroupCommonMapper) {
         this.groupRepository = groupRepository;
-        this.groupMapper = groupMapper;
         this.facultyMapper = facultyMapper;
         this.specialityMapper = specialityMapper;
+        this.alumniGroupCommonMapper = alumniGroupCommonMapper;
     }
 
     @Override
@@ -35,7 +38,7 @@ public class AlumniGroupServiceImpl implements AlumniGroupService {
         if (dto == null) {
             throw new NullPointerException();
         }
-        AlumniGroup group = groupMapper.toEntitySimplified(dto);
+        AlumniGroup group = alumniGroupCommonMapper.toEntitySimplified(dto);
         groupRepository.persist(group);
         return group;
     }
@@ -61,22 +64,25 @@ public class AlumniGroupServiceImpl implements AlumniGroupService {
 
     @Override
     public void deleteAlumniGroup(AlumniGroup group) throws Exception {
+        if(group == null) {
+            throw new NullPointerException();
+        }
         groupRepository.delete(group);
     }
 
     @Override
     public List<AlumniGroupBackDto> getAllAlumniGroupsDtoByFaculty(String faculty) throws Exception {
-        return groupMapper.toDtoList(groupRepository.find("faculty.facultyName", faculty).list());
+        return alumniGroupCommonMapper.toDtoList(groupRepository.find("faculty.facultyName", faculty).list());
     }
 
     @Override
     public List<AlumniGroupBackDto> getAllAlumniGroupsDtoByGraduationYear(int graduationYear) throws Exception {
-        return groupMapper.toDtoList(groupRepository.find("graduationYear", graduationYear).list());
+        return alumniGroupCommonMapper.toDtoList(groupRepository.find("graduationYear", graduationYear).list());
     }
 
     @Override
     public List<AlumniGroupBackDto> getAllAlumniGroupsDtoBySpeciality(String speciality) throws Exception {
-        return groupMapper.toDtoList(groupRepository.find("speciality.specialityName", speciality).list());
+        return alumniGroupCommonMapper.toDtoList(groupRepository.find("speciality.specialityName", speciality).list());
     }
 
     @Override
@@ -116,9 +122,10 @@ public class AlumniGroupServiceImpl implements AlumniGroupService {
 
     @Override
     public AlumniGroupBackDto getAlumniGroupDtoById(Integer id) throws Exception {
-        return groupMapper.toDto(groupRepository.findByIdOptional((long) id)
+        return alumniGroupCommonMapper.toAlumniGroupDto(groupRepository.findByIdOptional((long) id)
                 .orElseThrow(() -> new Exception(
                         "No Alumni Group was found.")));
     }
+    
 
 }

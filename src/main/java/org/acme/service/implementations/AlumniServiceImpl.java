@@ -8,6 +8,7 @@ import org.acme.avro.back.AlumniDto;
 import org.acme.avro.front.AlumniFrontDto;
 import org.acme.entites.Alumni;
 import org.acme.entites.AlumniDetails;
+import org.acme.entites.Degree;
 import org.acme.repository.AlumniDetailsRepository;
 import org.acme.repository.AlumniRepository;
 import org.acme.repository.DegreeRepository;
@@ -25,7 +26,6 @@ public class AlumniServiceImpl implements AlumniService {
     private final AlumniMapper alumniMapper;
     private final AlumniDetailsRepository alumniDetailsRepository;
     private final DegreeRepository degreeRepository;
-
 
     @Inject
     public AlumniServiceImpl(AlumniRepository alumniRepository, AlumniMapper alumniMapper,
@@ -54,14 +54,14 @@ public class AlumniServiceImpl implements AlumniService {
 
     @Override
     public List<Alumni> getAllAlumni() throws Exception {
-        List<Alumni> alumniList = alumniRepository.findAll().list();
+        List<Alumni> alumniList = alumniRepository.listAll();
         return alumniList;
     }
 
     @Override
     public List<AlumniDto> getAllAlumniDto() throws Exception { // add pagination?
-        List<Alumni> alumniList = alumniRepository.findAll(Sort.by("faculty_number")).list();
-        List<AlumniDetails> alumniDetailsList = alumniDetailsRepository.findAll(Sort.by("faculty_number")).list();
+        List<Alumni> alumniList = alumniRepository.listAll(Sort.by("faculty_number"));
+        List<AlumniDetails> alumniDetailsList = alumniDetailsRepository.listAll(Sort.by("faculty_number"));
         if (alumniList.isEmpty() || alumniDetailsList.isEmpty()) {
             throw new Exception("AlumniLists were not populated properly.");
         } else {
@@ -101,7 +101,7 @@ public class AlumniServiceImpl implements AlumniService {
         if (alumni == null || alumni.getFacultyNumber() == null) {
             throw new IllegalArgumentException("Alumni or faculty number must not be null");
         }
-        Alumni existingAlumni = Alumni.findById(alumni.getFacultyNumber());
+        Alumni existingAlumni = alumniRepository.findById((long) alumni.getFacultyNumber());
 
         if (existingAlumni == null) {
             throw new Exception("Alumni with faculty number " + alumni.getFacultyNumber() + " not found");
@@ -111,10 +111,11 @@ public class AlumniServiceImpl implements AlumniService {
         existingAlumni.setLinkedInUrl(alumni.getLinkedInUrl());
 
         if (alumni.getDegree() != null) {
-            existingAlumni.setDegree(alumni.getDegree());
+            Degree managedDegree = degreeRepository.findById((long) alumni.getDegree().getId());
+            existingAlumni.setDegree(managedDegree);
         }
 
-        existingAlumni.persist();
+        alumniRepository.persist(existingAlumni);
 
         return existingAlumni;
     }
@@ -125,7 +126,7 @@ public class AlumniServiceImpl implements AlumniService {
         if (alumni == null || alumni.getFacultyNumber() == 0) {
             throw new IllegalArgumentException("Alumni or faculty number must not be null");
         }
-        Alumni existingAlumni = Alumni.findById(alumni.getFacultyNumber());
+        Alumni existingAlumni = alumniRepository.findById((long) alumni.getFacultyNumber());
 
         if (existingAlumni == null) {
             throw new Exception("Alumni with faculty number " + alumni.getFacultyNumber() + " not found");
@@ -136,14 +137,15 @@ public class AlumniServiceImpl implements AlumniService {
 
 
         if (alumni.getDegree() != null) {
-            existingAlumni.setDegree(degreeRepository
-                    .findByNameOptional(alumni.getDegree())
-                    .orElseThrow(() -> new Exception(
-                            "Degree passed by AlumniFrontDto does not exist."))
-            );
+            Degree managedDegree = degreeRepository
+                .findByNameOptional(alumni.getDegree())
+                .orElseThrow(() -> new Exception(
+                    "Degree with this name was not found."));
+
+            existingAlumni.setDegree(managedDegree);
         }
 
-        existingAlumni.persist();
+        alumniRepository.persist(existingAlumni);
 
         return existingAlumni;
     }
@@ -153,7 +155,8 @@ public class AlumniServiceImpl implements AlumniService {
         alumniDetailsRepository.delete(alumniDetailsRepository.findById((long) facultyNumber));
         alumniRepository.delete(alumniRepository.findById((long) facultyNumber));
     }
-
+    
+    /// ERROR HERE
     public List<AlumniDto> convertAlumniListToDtoList(
             List<Alumni> alumniList,
             List<AlumniDetails> alumniDetailsList) throws Exception {
@@ -165,12 +168,13 @@ public class AlumniServiceImpl implements AlumniService {
             return alumniListDtos;
         }
         for (int i = 0; i < alumniList.size(); i++) {
-            if (alumniList.get(i).getFacultyNumber() != alumniDetailsList.get(i).getFacultyNumber()) {
+            if (alumniList.get(i).getFacultyNumber().intValue() != alumniDetailsList.get(i).getFacultyNumber().intValue()) {
                 throw new Exception("Arrays are deformed!");
             }
             alumniListDtos.add(alumniMapper.toDto(alumniList.get(i), alumniDetailsList.get(i)));
         }
         return alumniListDtos;
     }
+
 
 }

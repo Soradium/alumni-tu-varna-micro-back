@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class AlumniMapper {
     private final DegreeMapper degreeMapper;
-    private final AlumniGroupsMembershipMapper membershipMapper;
+    private final AlumniGroupCommonMapper commonMapper;
     private final FacultyService facultyService;
     private final AlumniService alumniService;
     private final DegreeService degreeService;
@@ -32,7 +32,7 @@ public class AlumniMapper {
     // Alumni Dto reflects both, so just create 2 methods per each, they share the PK; Details do not need toDto 
     // methods specifically made for them, as full data is packed with AlumniDto
 
-    public AlumniMapper(DegreeMapper degreeMapper, AlumniGroupsMembershipMapper membershipMapper,
+    public AlumniMapper(DegreeMapper degreeMapper, AlumniGroupCommonMapper commonMapper,
             FacultyService facultyService, AlumniService alumniService, DegreeService degreeService) {
         this.degreeMapper = degreeMapper;
         this.membershipMapper = membershipMapper;

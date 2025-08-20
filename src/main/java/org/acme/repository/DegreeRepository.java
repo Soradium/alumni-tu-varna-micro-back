@@ -1,18 +1,19 @@
 package org.acme.repository;
 
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import jakarta.enterprise.context.ApplicationScoped;
+import java.util.Optional;
+
 import org.acme.entites.Degree;
 
-import java.util.Optional;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class DegreeRepository implements PanacheRepository<Degree> {
     public Degree findByName(String degree) {
-        return find("degree", degree).firstResult();
+        return find("degreeName", degree).firstResult();
     }
 
     public Optional<Degree> findByNameOptional(String degree) {
-        return find("degree", degree).firstResultOptional();
+        return find("degreeName", degree).firstResultOptional();
     }
 }

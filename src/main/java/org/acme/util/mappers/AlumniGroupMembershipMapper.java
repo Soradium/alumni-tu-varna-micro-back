@@ -1,34 +1,22 @@
 package org.acme.util.mappers;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.Alumni;
 import org.acme.entites.AlumniGroup;
 import org.acme.entites.AlumniGroupsMembership;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-@Mapper(componentModel = "cdi", uses = {
-        AlumniGroupMapper.class
-
+@Mapper(componentModel = MappingConstants.ComponentModel.JAKARTA, uses = {
 }
 )
-@ApplicationScoped
 public abstract class AlumniGroupMembershipMapper {
-
-    @Inject
-    private AlumniGroupMapper groupMapper;
-
-    @Mapping(target = "facultyNumber", source = "alumni.facultyNumber")
-    @Mapping(target = "groupBuilder", ignore = true)
-    public abstract AlumniGroupMembershipDto toBackDto(AlumniGroupsMembership entity);
 
     @Named("toEntityFromDtoAlumniGroupMembershipList")
     public List<AlumniGroupsMembership> toEntityList(
@@ -40,10 +28,10 @@ public abstract class AlumniGroupMembershipMapper {
 
             Alumni alumni = new Alumni();
             alumni.setFacultyNumber(m.getFacultyNumber());
-            agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
-
+            agm.setAlumni(alumni); 
+            // will probably need enrichment or wiring, only faculty number added
+            // they do not have group also
             agm.setAverageScore(m.getAverageScore());
-            agm.setGroup(groupMapper.toEntity(m.getGroup()));
 
             return agm;
         }).collect(Collectors.toList())
@@ -60,7 +48,9 @@ public abstract class AlumniGroupMembershipMapper {
 
             Alumni alumni = new Alumni();
             alumni.setFacultyNumber(m.getFacultyNumber());
-            agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+            agm.setAlumni(alumni); 
+            // will probably need enrichment or wiring, only faculty number added
+            // does not have real group also
 
             agm.setAverageScore(m.getAverageScore());
             AlumniGroup group = new AlumniGroup();
@@ -74,36 +64,36 @@ public abstract class AlumniGroupMembershipMapper {
 
     @Named("toEntityFromDtoAlumniGroupMembershipSingle")
     public AlumniGroupsMembership toEntity(
-            AlumniGroupMembershipDto dto
-    ) {
+            AlumniGroupMembershipDto dto) {
         AlumniGroupsMembership agm = new AlumniGroupsMembership();
         agm.setId(dto.getId());
 
         Alumni alumni = new Alumni();
         alumni.setFacultyNumber(dto.getFacultyNumber());
-        agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+        agm.setAlumni(alumni); 
+        // will probably need enrichment or wiring, only faculty number added
 
         agm.setAverageScore(dto.getAverageScore());
-        agm.setGroup(groupMapper.toEntity(dto.getGroup()));
 
         return agm;
 
     }
 
-
     @Named("toEntityFromDtoAlumniGroupMembershipFrontSingle")
     public AlumniGroupsMembership toEntityFront(
-            AlumniGroupMembershipFrontDto dto
-    ) {
+            AlumniGroupMembershipFrontDto dto) {
         AlumniGroupsMembership agm = new AlumniGroupsMembership();
         agm.setId(dto.getId());
 
         Alumni alumni = new Alumni();
         alumni.setFacultyNumber(dto.getFacultyNumber());
-        agm.setAlumni(alumni); // will probably need enrichment or wiring, only faculty number added
+        agm.setAlumni(alumni); 
+        // will probably need enrichment or wiring, only faculty number added
 
         agm.setAverageScore(dto.getAverageScore());
         AlumniGroup group = new AlumniGroup();
+        // will need group enrichment
+
         group.setId(dto.getGroupNumber());
         agm.setGroup(group);
         return agm;
@@ -114,14 +104,14 @@ public abstract class AlumniGroupMembershipMapper {
     public List<AlumniGroupMembershipDto> toBackDtos(List<AlumniGroupsMembership> memberships) {
         return memberships.stream().map(m -> {
             AlumniGroupMembershipDto dto = new AlumniGroupMembershipDto();
+            // will need group enrichment
             dto.setAverageScore(m.getAverageScore());
             dto.setFacultyNumber(m.getAlumni().getFacultyNumber());
-            dto.setGroup(groupMapper.toDto(m.getGroup()));
             dto.setId(m.getId());
+            
             return dto;
         }).collect(Collectors.toList());
     }
-
 
     @Named("extractMembershipIds")
     public List<Integer> extractMembershipIds(List<AlumniGroupsMembership> memberships) {
@@ -141,5 +131,18 @@ public abstract class AlumniGroupMembershipMapper {
                 : new ArrayList<>();
     }
 
+     @Named("extractMembershipId")
+    public Integer extractMembershipId(AlumniGroupsMembership membership) {
+        return membership != null ? membership.getId() : null;
+    }
+
+    @Named("toBasicEntitySingle")
+    public AlumniGroupsMembership toBasicEntitySingle(Integer membershipId) {
+        if (membershipId == null) return null;
+        AlumniGroupsMembership agm = new AlumniGroupsMembership();
+        agm.setId(membershipId);
+        return agm;
+    }
+    
 
 }

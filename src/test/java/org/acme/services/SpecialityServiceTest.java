@@ -1,11 +1,14 @@
 package org.acme.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,24 +20,36 @@ import org.acme.service.implementations.SpecialityServiceImpl;
 import org.acme.util.mappers.SpecialityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.quarkus.panache.mock.PanacheMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+
+@QuarkusTest
 public class SpecialityServiceTest {
 
-    @Mock
+    @InjectMock
     private SpecialityRepository specialityRepository;
 
-    @Mock
+    @Inject
     private SpecialityMapper specialityMapper;
-
-    @InjectMocks
+    @Inject
     private SpecialityServiceImpl specialityService;
+
+    private Speciality sE1;
+    private Speciality sE2;
+    private SpecialityDto s1;
+    private SpecialityDto s2;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        s1 = new SpecialityDto(1, "Cardiology");
+        sE1 = new Speciality(1, "Cardiology");
+        s2 = new SpecialityDto(2, "Neurology");
+        sE2 = new Speciality(2,  "Neurology");
     }
 
     // ----------- createSpeciality -------------
@@ -47,21 +62,18 @@ public class SpecialityServiceTest {
 
     @Test
     void createSpeciality_validDto_persistsAndReturnsEntity() throws Exception {
-        SpecialityDto dto = new SpecialityDto(1, "Cardiology");
-        Speciality entity = new Speciality(1, "Cardiology");
 
-        when(specialityMapper.toEntity(dto)).thenReturn(entity);
+        Speciality result = specialityService.createSpeciality(s1);
 
-        Speciality result = specialityService.createSpeciality(dto);
-
-        verify(specialityRepository).persist(entity);
-        assertEquals("Cardiology", result.getSpecialityName());
+        verify(specialityRepository).persist(any(Speciality.class));
+        assertSame(s1.getSpecialityName(), result.getSpecialityName());
     }
 
     // ----------- deleteSpeciality -------------
 
     @Test
     void deleteSpeciality_invalidId_throwsException() {
+        PanacheMock.mock(SpecialityServiceImpl.class);
         Exception ex = assertThrows(Exception.class, () -> specialityService.deleteSpeciality(0));
         assertEquals("Speciality ID is invalid.", ex.getMessage());
     }
@@ -87,7 +99,8 @@ public class SpecialityServiceTest {
 
     @Test
     void getAllSpecialities_emptyList_returnsEmptyDtoList() throws Exception {
-        when(specialityRepository.findAll().list()).thenReturn(Collections.emptyList());
+
+        when(specialityRepository.listAll()).thenReturn(new ArrayList<>());
 
         List<SpecialityDto> result = specialityService.getAllSpecialities();
 
@@ -96,9 +109,8 @@ public class SpecialityServiceTest {
 
     @Test
     void getAllSpecialities_nonEmptyList_returnsDtoList() throws Exception {
-        Speciality s1 = new Speciality(1, "Cardiology");
-        Speciality s2 = new Speciality(2, "Neurology");
-        when(specialityRepository.findAll().list()).thenReturn(List.of(s1, s2));
+
+        when(specialityRepository.listAll()).thenReturn(List.of(sE1,sE2));
 
         List<SpecialityDto> result = specialityService.getAllSpecialities();
 

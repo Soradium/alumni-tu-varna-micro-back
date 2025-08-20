@@ -1,16 +1,14 @@
-package org.acme.service;
+package org.acme.service.group_service;
+
+import java.util.List;
 
 import org.acme.avro.back.AlumniGroupMembershipDto;
 import org.acme.avro.front.AlumniGroupMembershipFrontDto;
 import org.acme.entites.AlumniGroupsMembership;
 
-import java.util.List;
-
 
 public interface AlumniGroupMembershipService {
     AlumniGroupsMembership getAlumniGroupsMembershipById(Integer id) throws Exception;
-
-    AlumniGroupsMembership getAlumniGroupsMembershipByName(String name) throws Exception;
 
     List<AlumniGroupMembershipDto> getAllAlumniGroupMembershipsDto() throws Exception;
 
